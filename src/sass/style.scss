@@ -1,24 +1,17 @@
 @import 'service/normalize';
 @import 'service/base';
-@import 'service/mixins';
+// @import 'service/mixins';
    
 
 //blocks style
-    @import 'blocks/0_header';
-
-
-// services
-    @import 'blocks/modal';
-
+    // @import 'blocks/';
 
 
 //media query
-    @import 'media/media_0_1200';
-    @import 'media/media_1_991';
-    @import 'media/media_2_767';
-    @import 'media/media_3_575';
+    // @import 'media/';
+
 
 
 //service styles 
-    @import 'service/animation';
-    @import 'service/fonts';
+    // @import 'service/animation';
+    // @import 'service/fonts';

@@ -1,9 +1,10 @@
-// import modals from './modules/sampleDir';
 import '../sass/style.scss';
+
+import VoronInputValidation from  './modules/VoronInputValidation.js';
 
 
 window.addEventListener('DOMContentLoaded', () =>{
-    "use strict";
+    let passwordValidation = new VoronInputValidation;
 
-
+    console.log(passwordValidation);
 });

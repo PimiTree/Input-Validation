@@ -1,9 +1,13 @@
+:root {
+    --content: "1";
+}
+
 .voron_field {
     position: relative;
 }
 .voron_field:after {
     padding: 0px 15px;
-    content: "boringsdfsdfsd";
+    content: var(--content);
     box-sizing: border-box;
     position: absolute;
     transform: translateX(100%);

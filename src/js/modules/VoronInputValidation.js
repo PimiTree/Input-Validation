@@ -77,6 +77,9 @@ export default class VoronInputValidation {
             }            
         })
     }
+    #setMessage () {
+
+    }
 
     #observeInputChanges() {
         this.inputs.forEach((input, i)=> {

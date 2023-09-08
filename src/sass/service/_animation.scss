@@ -1,0 +1,9 @@
+@keyframes fade{
+    from {
+        filter: opacity(50%);
+    }
+    
+    to {
+        filter: opacity(100%);
+    }
+}

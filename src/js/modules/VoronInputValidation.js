@@ -1,49 +1,55 @@
 export default class VoronInputValidation {
-    constructor( form = '[data-voron]', debounceDelay = 100,) {
-        this.form = document.querySelector(form);
-        this.inputs = [...this.form.querySelectorAll('input')];
-        this._inputsValidBundle = [];
-        this._debounceDelay = debounceDelay;
+    constructor(options) {
+        this.form = document.querySelector(options?.form) || document.querySelector('[data-voron]');
+        this.debounceDelay = options?.debounceDelay || 100;
         this.inputTypes = {  // default regex templates
             text: /^[a-zA-Zа-яёїА-ЯЇЁ\s\d\-_:.,\s]+$/,
             name: /^[a-zA-Zа-яёїА-ЯЇЁ\s\d\-_\s]{3,20}$/,
             email: /^[a-zA-Z_\-\0-9.]{2,}@[a-zA-Z]{2,}\.[a-zA-Z]{2,}$/,
             tel: /^\+*\d{7,25}$/,
             password: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[$^.*+?\/{}\[\]()|@:,;\-_=<>%#~&!])[a-zA-Z\d$^.*+?\/{}\[\]()|@:,;-_=<>%#~&!]{5,}$/,
-            url: /^(http:\/\/|https:\/\/)?([a-zA-Z_\-0-9]{2,}\.){1,}[a-zA-Z]{2,}(\/?[a-zA-Z\d\?=%\+_\-&]\/?)*$/,
+            url: /^(http:\/\/|https:\/\/)?([a-zA-Z_\-0-9]{2,}\.){1,}[a-zA-Z]{2,}[\/?[a-zA-Z\d?=%\+_\-&]*\/?]*$/,
         }
         this.errors = {
                         text: {
-                            wrongSymbol: 'Allowed a-z, 0-9, spaces, -_:,.',
+                            wrongSymbol: options?.errors.text.wrongSymbol || 'Allowed a-z, 0-9, spaces, -_:,.',
                         },
                         name: {
-                            wrongSymbol: 'Allowed a-z, 0-9, spaces, -_',
-                            tooLong: 'Max 20 symbols',
-                            tooShort: 'Must be longer then 2 symbol',
+                            wrongSymbol: options?.errors.name.wrongSymbol || 'Allowed a-z, 0-9, spaces, -_',
+                            tooLong: options?.errors.name.tooLong || 'Max 20 symbols',
+                            tooShort: options?.errors.tname.tooShort || 'Must be longer then 2 symbol',
                         },
                         email: {
-                            tooShort: 'Must be longer then 7 symbol',
-                            notEmail: 'Is not email',
+                            tooShort: options?.errors.email.tooShort ||  'Must be longer then 7 symbol',
+                            notEmail: options?.errors.email.notEmail ||  'Is not email',
                         },
                         tel: {
-                            wrongSymbol: 'Allowed + and 0-9',
-                            tooLong: 'Max 25 symbols',
-                            tooShort: 'Must be longer then 7 symbol',
+                            wrongSymbol: options?.errorstel.wrongSymbol || 'Allowed + and 0-9',
+                            tooLong: options?.errorstel.tooLong || 'Max 25 symbols',
+                            tooShort: options?.errorstel.tooLong || 'Must be longer then 7 symbol',
                         },
                         password: {
-                            tooShort: 'Must be longer then 5 symbols',
-                            minConditions: 'one lower and uppercase, one number and one special char ($^.*+?/{}[]()|@:,;-_=<>%#~&!)',
+                            tooShort: options?.errors.password.tooShort || 'Must be longer then 5 symbols',
+                            minConditions: options?.errors.password.minConditions || 'one lower and uppercase, one number and one special char ($^.*+?/{}[]()|@:,;-_=<>%#~&!)',
                         },
                         url: {
-                            wrongLink: 'It is not link'
+                            wrongLink: options?.errors.url.wrongLink || 'It is not link'
                         },
         };
-        this.inputType = [];
-        this.regex = [];
+        
+        this.regex = [];  /// toprivat scope
+
+        const inputs = [...this.form.querySelectorAll('input')];
+        console.log()
+        let inputsValidBundle = [];
+        let inputType = [];
+
         this.#disableFormSubmit();
-        this.#setInitalState();
+        this.#setInitalState(inputs, inputType, inputsValidBundle);
         this.#setMessageContainer();
-        this.#observeInputChanges();
+        this.#observeInputChanges(inputs, inputsValidBundle, inputType);
+
+      
         // validation sector END
     }
 
@@ -58,16 +64,16 @@ export default class VoronInputValidation {
         this.form.removeEventListener('submit', this.#preventDefault);  
     }
     // prepare default state 
-    #setInitalState() {
-        this.inputs.forEach((input, i)=> {
-            this.inputType.push(input.getAttribute('type'));
-            this.regex.push(this.inputTypes[`${this.inputType[i]}`]); // create class regex pool
-            this._inputsValidBundle[i] = false; // set validity to dafault false according to amount of inputs in form
+    #setInitalState(inputs, inputType, inputsValidBundle) {
+        inputs.forEach((input, i)=> {
+            inputType.push(input.getAttribute('type'));
+            this.regex.push(this.inputTypes[`${inputType[i]}`]); // create class regex pool
+            inputsValidBundle[i] = false; // set validity to dafault false according to amount of inputs in form
         })
     }
 
-    #isFormValid() {  
-        const isValid = !this._inputsValidBundle.includes(false);
+    #isFormValid(inputsValidBundle) {  
+        const isValid = !inputsValidBundle.includes(false);
         isValid ? this.#enableFormSubmit() : this.#disableFormSubmit();
     }
 
@@ -176,28 +182,31 @@ export default class VoronInputValidation {
     }
 
     // main script
-    #observeInputChanges() {
-        this.inputs.forEach((input, i)=> {
+    #observeInputChanges(inputs, inputsValidBundle, inputType) {
+        inputs.forEach((input, i)=> {
                   
             input.classList.add('is_focused');// add firsts vue components to page
             let timer;
             input.addEventListener('input', (e) => {
                 clearTimeout(timer);  // debouncing for form
-                const value = e.target.value;
+                let value = e.target.value;
                 const validationStatus = this.regex[i].test(value);
                 timer = setTimeout(() => {
                     if (validationStatus) {
+                        if (inputType[i] === 'url') {
+                           /(http:\/\/|https:\/\/)/.test(value) ? e.target.value = value : e.target.value = 'https://' + value;
+                        }
                         this.#setValidApearence(input);
-                        this._inputsValidBundle[i] = true;
-                        this.#isFormValid();
+                        inputsValidBundle[i] = true;
+                        this.#isFormValid(inputsValidBundle);
                         this.#setMessage(input, validationStatus);
                     } else {
                         this.#setInvalidApearence(input, value)
-                        this._inputsValidBundle[i] = false;
-                        this.#isFormValid();
+                        inputsValidBundle[i] = false;
+                        this.#isFormValid(inputsValidBundle);
                         this.#setMessage(input, validationStatus);
                     }
-                }, this._debounceDelay);                  
+                }, this.debounceDelay);                  
             })
         }) 
     }  

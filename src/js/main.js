@@ -4,5 +4,7 @@ import VoronInputValidation from  './modules/VoronInputValidation.js';
 
 
 window.addEventListener('DOMContentLoaded', () =>{
-    let passwordValidation = new VoronInputValidation;   
+    let passwordValidation = new VoronInputValidation;  
+    
+    passwordValidation.debounceDelay = 100;
 });

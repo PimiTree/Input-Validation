@@ -1,13 +1,10 @@
-:root {
-    --content: "1";
-}
 
 .voron_field {
     position: relative;
 }
-.voron_field:after {
+
+.is_message {
     padding: 0px 15px;
-    content: var(--content);
     box-sizing: border-box;
     position: absolute;
     transform: translateX(100%);
@@ -16,17 +13,20 @@
     display: flex;
     align-items: center;
     height: 100%;
-    width: fit-content;
+    width: max-content;
+}
+.is_valid_img {
+    height: 50%;
 }
 .is_focused:focus {
     border: 1px solid #000000c9;
 }
 .is_valid {
-    border-color: rgba(28, 206, 28, 0.75);
+    border-color: #1cce1cbf;
 }
 .is_invalid:focus {
-    border-color: rgb(251, 29, 29);
-    color: rgb(251, 29, 29);
+    border-color: #fb1d1d;
+    color: #fb1d1d;
 }
 
 

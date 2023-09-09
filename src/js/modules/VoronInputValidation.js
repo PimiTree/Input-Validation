@@ -20,7 +20,6 @@ export default class VoronInputValidation {
                             tooShort:  'Must be longer then 2 symbol',
                         },
                         email: {
-                            tooShort:   'Must be longer then 7 symbol',
                             notEmail:  'Is not email',
                         },
                         tel: {
@@ -31,6 +30,7 @@ export default class VoronInputValidation {
                         password: {
                             tooShort:  'Must be longer then 5 symbols',
                             minConditions:  'one lower and uppercase, one number and one special char ($^.*+?/{}[]()|@:,;-_=<>%#~&!)',
+                            passNotEquals: 'passwords must be the same',
                         },
                         url: {
                             wrongLink:  'It is not link'
@@ -60,10 +60,15 @@ export default class VoronInputValidation {
     // prepare default state 
     #setInitalState(inputs, inputType, inputsValidBundle) {
         inputs.forEach((input, i)=> {
+            if (inputType.includes(input.getAttribute('type'))) {  // set data sttribures form new password fields roles 
+                inputs[i-1].setAttribute("data-voron", 'password-main');
+                inputs[i].setAttribute("data-voron", 'password-repeat');
+            }
             inputType.push(input.getAttribute('type'));
             this.regex.push(this.inputTypes[`${inputType[i]}`]); // create class regex pool
             inputsValidBundle[i] = false; // set validity to dafault false according to amount of inputs in form
         })
+        ;
     }
     #setMessageContainer () { // create containers for inputs and reassebmle inner HTML
         [...this.form.querySelectorAll('*')].forEach((elem, i)=> {
@@ -84,6 +89,12 @@ export default class VoronInputValidation {
         })
     }
     // service methods END
+
+    // conditions START
+    #isReapetPasword(input) {
+        return input.getAttribute('data-voron') == 'password-repeat' && input.value !== this.form.querySelector('[data-voron="password-main"]').value
+    }
+    // conditions END
 
     // VUE functions START
     #setValidApearence(elem)  {
@@ -117,8 +128,10 @@ export default class VoronInputValidation {
             let timer;
             input.addEventListener('input', (e) => {
                 clearTimeout(timer);  // debouncing for form
-                let value = e.target.value;
-                const validationStatus = this.regex[i].test(value);
+                let value = e.target.value;             
+                let repeatStatus =  this.#isReapetPasword(input);
+                let validationStatus = repeatStatus ? false : this.regex[i].test(value);
+                this.#isReapetPasword(input);
                 timer = setTimeout(() => {
                     if (validationStatus) {
                         if (inputType[i] === 'url') {
@@ -178,9 +191,7 @@ export default class VoronInputValidation {
                 }
                 break;
             case 'email': 
-                if (value.length <= 7) {
-                    messageContainer.textContent = this.errors[inputType].tooShort;
-                } else if (!/@{1}/.test(value) || !/\.{1}/.test(value) || !this.inputTypes[inputType].test(value)) {
+                if (!/@{1}/.test(value) || !/\.{1}/.test(value) || !this.inputTypes[inputType].test(value)) {
                     messageContainer.textContent = this.errors[inputType].notEmail;
                 } 
                 break;
@@ -196,9 +207,11 @@ export default class VoronInputValidation {
             case 'password': 
                 if (value.length <= 5) {
                     messageContainer.textContent = this.errors[inputType].tooShort;
-                } else if (!/[a-z]{1}/.test(value) || !/[A-Z]{1}/.test(value) || !/[0-9]{1}/.test(value) || !/[$^.*+?/{}[]()|@:,;\-_=<>%#~&!]{1}/.test(value) ) {
+                } else if (!/[a-z]{1}/.test(value) || !/[A-Z]{1}/.test(value) || !/[0-9]{1}/.test(value) || !/[$^.*+?\/{}\[\]()|@:,;\-_=<>%#~&!]{1}/.test(value) ) {
                     messageContainer.textContent = this.errors[inputType].minConditions;
-                } 
+                } else if (this.#isReapetPasword(input)) {
+                    messageContainer.textContent = this.errors[inputType].passNotEquals;
+                }
                 break;
             case 'url': 
                 messageContainer.textContent = this.errors[inputType].wrongLink;

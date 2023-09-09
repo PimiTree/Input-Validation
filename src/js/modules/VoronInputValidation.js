@@ -1,19 +1,16 @@
 export default class VoronInputValidation {
     constructor( form = '[data-voron]', debounceDelay = 100,) {
         this.form = document.querySelector(form);
-        this.formInner =  [...this.form.querySelectorAll('*')],
         this.inputs = [...this.form.querySelectorAll('input')];
         this._inputsValidBundle = [];
         this._debounceDelay = debounceDelay;
-       
         this.inputTypes = {  // default regex templates
             text: /^[a-zA-Zа-яёїА-ЯЇЁ\s\d\-_:.,\s]+$/,
             name: /^[a-zA-Zа-яёїА-ЯЇЁ\s\d\-_\s]{3,20}$/,
             email: /^[a-zA-Z_\-\0-9.]{2,}@[a-zA-Z]{2,}\.[a-zA-Z]{2,}$/,
             tel: /^\+*\d{7,25}$/,
-            // password: /[a-zA-Z\d$^.*+?\/{}\[\]()|@:,;-_=<>%#~&!]{5,}/,
             password: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[$^.*+?\/{}\[\]()|@:,;\-_=<>%#~&!])[a-zA-Z\d$^.*+?\/{}\[\]()|@:,;-_=<>%#~&!]{5,}$/,
-            url: /^(http:\/\/|https:\/\/)?([a-zA-Z_\-0-9]{2,}\.){1,}[a-zA-Z]{2,}(\/[a-zA-Z\d\?=%\+_\-&]+)*$/,
+            url: /^(http:\/\/|https:\/\/)?([a-zA-Z_\-0-9]{2,}\.){1,}[a-zA-Z]{2,}(\/?[a-zA-Z\d\?=%\+_\-&]\/?)*$/,
         }
         this.errors = {
                         text: {
@@ -40,12 +37,12 @@ export default class VoronInputValidation {
                         url: {
                             wrongLink: 'It is not link'
                         },
-                    }
+        };
         this.inputType = [];
         this.regex = [];
         this.#disableFormSubmit();
         this.#setInitalState();
-        this.#setMessageContainer(this.formInner);
+        this.#setMessageContainer();
         this.#observeInputChanges();
         // validation sector END
     }
@@ -70,12 +67,8 @@ export default class VoronInputValidation {
     }
 
     #isFormValid() {  
-        const validityState = !this._inputsValidBundle.includes(false);
-        if (validityState) {
-            this.#enableFormSubmit();
-        } else {
-            this.#disableFormSubmit();
-        }
+        const isValid = !this._inputsValidBundle.includes(false);
+        isValid ? this.#enableFormSubmit() : this.#disableFormSubmit();
     }
 
     // vue functions 
@@ -96,8 +89,8 @@ export default class VoronInputValidation {
     }
 
     // Error messaging
-    #setMessageContainer (formInner) { // create containers for inouts and reassebmle inner HTML
-        formInner.forEach((elem, i)=> {
+    #setMessageContainer () { // create containers for inouts and reassebmle inner HTML
+        [...this.form.querySelectorAll('*')].forEach((elem, i)=> {
             if (elem.tagName === 'INPUT') {
                 const inputWrapper = document.createElement('div');
                 inputWrapper.classList.add('voron_field');
@@ -114,15 +107,16 @@ export default class VoronInputValidation {
             }              
         })
     }
-    #setMessage (input, validationStatus, value, regex,) {
-
-        if (validationStatus) { // if true append okmessage
-            const okImg = document.createElement('img');
-            okImg.setAttribute('src', '../img/ok.svg');
-            okImg.classList.add('is_valid_img');
-            // if okImg img already exist not try append
-            input.nextSibling.textContent = "";
-            if (!input.nextSibling.querySelector('.is_valid_img')) {input.nextSibling.append(okImg)};   
+    #setMessage (input, validationStatus) {
+         if (validationStatus) { // if true append okmessage
+            if (!input.nextSibling.querySelector('.is_valid_img')) {
+                const okImg = document.createElement('img');
+                okImg.setAttribute('src', '../img/ok.svg');
+                okImg.classList.add('is_valid_img');
+                // if okImg img already exist not try append
+                input.nextSibling.textContent = "";  
+                input.nextSibling.append(okImg);     
+            }    
         } else {
             try { // if we got in_valid try to remove okImg
                 input.nextSibling.querySelector('.is_valid_img').remove();
@@ -154,7 +148,7 @@ export default class VoronInputValidation {
             case 'email': 
                 if (value.length <= 7) {
                     messageContainer.textContent = this.errors[inputType].tooShort;
-                } else if (!/@{1}/.test(value) || !/\.{1}/.test(value) || !this.inputTypes[inputType]) {
+                } else if (!/@{1}/.test(value) || !/\.{1}/.test(value) || !this.inputTypes[inputType].test(value)) {
                     messageContainer.textContent = this.errors[inputType].notEmail;
                 } 
                 break;

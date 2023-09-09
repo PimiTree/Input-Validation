@@ -12,48 +12,42 @@ export default class VoronInputValidation {
         }
         this.errors = {
                         text: {
-                            wrongSymbol: options?.errors.text.wrongSymbol || 'Allowed a-z, 0-9, spaces, -_:,.',
+                            wrongSymbol: 'Allowed a-z, 0-9, spaces, -_:,.',
                         },
                         name: {
-                            wrongSymbol: options?.errors.name.wrongSymbol || 'Allowed a-z, 0-9, spaces, -_',
-                            tooLong: options?.errors.name.tooLong || 'Max 20 symbols',
-                            tooShort: options?.errors.tname.tooShort || 'Must be longer then 2 symbol',
+                            wrongSymbol:  'Allowed a-z, 0-9, spaces, -_',
+                            tooLong:  'Max 20 symbols',
+                            tooShort:  'Must be longer then 2 symbol',
                         },
                         email: {
-                            tooShort: options?.errors.email.tooShort ||  'Must be longer then 7 symbol',
-                            notEmail: options?.errors.email.notEmail ||  'Is not email',
+                            tooShort:   'Must be longer then 7 symbol',
+                            notEmail:  'Is not email',
                         },
                         tel: {
-                            wrongSymbol: options?.errorstel.wrongSymbol || 'Allowed + and 0-9',
-                            tooLong: options?.errorstel.tooLong || 'Max 25 symbols',
-                            tooShort: options?.errorstel.tooLong || 'Must be longer then 7 symbol',
+                            wrongSymbol: 'Allowed + and 0-9',
+                            tooLong: 'Max 25 symbols',
+                            tooShort: 'Must be longer then 7 symbol',
                         },
                         password: {
-                            tooShort: options?.errors.password.tooShort || 'Must be longer then 5 symbols',
-                            minConditions: options?.errors.password.minConditions || 'one lower and uppercase, one number and one special char ($^.*+?/{}[]()|@:,;-_=<>%#~&!)',
+                            tooShort:  'Must be longer then 5 symbols',
+                            minConditions:  'one lower and uppercase, one number and one special char ($^.*+?/{}[]()|@:,;-_=<>%#~&!)',
                         },
                         url: {
-                            wrongLink: options?.errors.url.wrongLink || 'It is not link'
+                            wrongLink:  'It is not link'
                         },
         };
         
-        this.regex = [];  /// toprivat scope
+        this.regex = [];  /// set to privat scope
 
         const inputs = [...this.form.querySelectorAll('input')];
         console.log()
         let inputsValidBundle = [];
         let inputType = [];
 
-        this.#disableFormSubmit();
-        this.#setInitalState(inputs, inputType, inputsValidBundle);
-        this.#setMessageContainer();
-        this.#observeInputChanges(inputs, inputsValidBundle, inputType);
-
-      
-        // validation sector END
+        this.#init(inputs, inputType, inputsValidBundle);
     }
 
-    // service methods
+    // service methods STARTS
     #preventDefault(e) {
         e.preventDefault();
     }
@@ -71,31 +65,7 @@ export default class VoronInputValidation {
             inputsValidBundle[i] = false; // set validity to dafault false according to amount of inputs in form
         })
     }
-
-    #isFormValid(inputsValidBundle) {  
-        const isValid = !inputsValidBundle.includes(false);
-        isValid ? this.#enableFormSubmit() : this.#disableFormSubmit();
-    }
-
-    // vue functions 
-    #setValidApearence(elem)  {
-        elem.classList.remove('is_focused');
-        elem.classList.remove('is_invalid');   
-        elem.classList.add('is_valid');
-    }
-
-    #setInvalidApearence(elem, value) {
-        elem.classList.remove('is_focused');
-        elem.classList.remove('is_valid');
-        elem.classList.add('is_invalid');
-        if (value.length === 0) {
-            elem.classList.remove('is_invalid'); 
-            elem.classList.add('is_focused');
-        }
-    }
-
-    // Error messaging
-    #setMessageContainer () { // create containers for inouts and reassebmle inner HTML
+    #setMessageContainer () { // create containers for inputs and reassebmle inner HTML
         [...this.form.querySelectorAll('*')].forEach((elem, i)=> {
             if (elem.tagName === 'INPUT') {
                 const inputWrapper = document.createElement('div');
@@ -113,24 +83,80 @@ export default class VoronInputValidation {
             }              
         })
     }
-    #setMessage (input, validationStatus) {
-         if (validationStatus) { // if true append okmessage
-            if (!input.nextSibling.querySelector('.is_valid_img')) {
-                const okImg = document.createElement('img');
-                okImg.setAttribute('src', '../img/ok.svg');
-                okImg.classList.add('is_valid_img');
-                // if okImg img already exist not try append
-                input.nextSibling.textContent = "";  
-                input.nextSibling.append(okImg);     
-            }    
-        } else {
-            try { // if we got in_valid try to remove okImg
-                input.nextSibling.querySelector('.is_valid_img').remove();
-            } catch (e) {};
-            this.#prepareErrorMessage(input);
-        }     
-    }
+    // service methods END
 
+    // VUE functions START
+    #setValidApearence(elem)  {
+        elem.classList.remove('is_focused');
+        elem.classList.remove('is_invalid');   
+        elem.classList.add('is_valid');
+    }
+    #setInvalidApearence(elem, value) {
+        elem.classList.remove('is_focused');
+        elem.classList.remove('is_valid');
+        elem.classList.add('is_invalid');
+        if (value.length === 0) {
+            elem.classList.remove('is_invalid'); 
+            elem.classList.add('is_focused');
+        }
+    }
+    #createImgForValidMessage() {
+        const img = document.createElement('img');
+        img.setAttribute('src', '../img/ok.svg');
+        img.classList.add('is_valid_img');
+
+        return img;
+    }
+    // VUE functions END
+
+    // main script
+    #observeInputChanges(inputs, inputType, inputsValidBundle) {
+        inputs.forEach((input, i)=> {
+                  
+            input.classList.add('is_focused');// add firsts vue components to page
+            let timer;
+            input.addEventListener('input', (e) => {
+                clearTimeout(timer);  // debouncing for form
+                let value = e.target.value;
+                const validationStatus = this.regex[i].test(value);
+                timer = setTimeout(() => {
+                    if (validationStatus) {
+                        if (inputType[i] === 'url') {
+                           /(http:\/\/|https:\/\/)/.test(value) ? e.target.value = value : e.target.value = 'https://' + value;
+                        }
+                        this.#setValidApearence(input);
+                        inputsValidBundle[i] = true;
+                        this.#isFormValid(inputsValidBundle);
+                        this.#setMessage(input, validationStatus);
+                    } else {
+                        this.#setInvalidApearence(input, value)
+                        inputsValidBundle[i] = false;
+                        this.#isFormValid(inputsValidBundle);
+                        this.#setMessage(input, validationStatus);
+                    }
+                }, this.debounceDelay);                  
+            })
+        }) 
+    } 
+    #isFormValid(inputsValidBundle) {  
+        const isValid = !inputsValidBundle.includes(false);
+        isValid ? this.#enableFormSubmit() : this.#disableFormSubmit();
+    } 
+    #setMessage (input, validationStatus) {
+        if (validationStatus) { // if true append okmessage
+           if (!input.nextSibling.querySelector('.is_valid_img')) {
+               const okImg = this.#createImgForValidMessage();
+               // if okImg img already exist not try append
+               input.nextSibling.textContent = "";  
+               input.nextSibling.append(okImg);     
+           }    
+       } else {
+           try { // if we got in_valid try to remove okImg
+               input.nextSibling.querySelector('.is_valid_img').remove();
+           } catch (e) {};
+           this.#prepareErrorMessage(input);
+       }     
+    }
     #prepareErrorMessage(input) {
         const inputType = input.getAttribute('type');
         const messageContainer = input.nextSibling;
@@ -178,39 +204,13 @@ export default class VoronInputValidation {
                 messageContainer.textContent = this.errors[inputType].wrongLink;
                 break;
         }
-        // console.log(inputType);
     }
 
-    // main script
-    #observeInputChanges(inputs, inputsValidBundle, inputType) {
-        inputs.forEach((input, i)=> {
-                  
-            input.classList.add('is_focused');// add firsts vue components to page
-            let timer;
-            input.addEventListener('input', (e) => {
-                clearTimeout(timer);  // debouncing for form
-                let value = e.target.value;
-                const validationStatus = this.regex[i].test(value);
-                timer = setTimeout(() => {
-                    if (validationStatus) {
-                        if (inputType[i] === 'url') {
-                           /(http:\/\/|https:\/\/)/.test(value) ? e.target.value = value : e.target.value = 'https://' + value;
-                        }
-                        this.#setValidApearence(input);
-                        inputsValidBundle[i] = true;
-                        this.#isFormValid(inputsValidBundle);
-                        this.#setMessage(input, validationStatus);
-                    } else {
-                        this.#setInvalidApearence(input, value)
-                        inputsValidBundle[i] = false;
-                        this.#isFormValid(inputsValidBundle);
-                        this.#setMessage(input, validationStatus);
-                    }
-                }, this.debounceDelay);                  
-            })
-        }) 
-    }  
-    
-    
+    #init(inputs, inputType, inputsValidBundle) {
+        this.#disableFormSubmit();
+        this.#setInitalState(inputs, inputType, inputsValidBundle);
+        this.#setMessageContainer();
+        this.#observeInputChanges(inputs, inputType, inputsValidBundle);
+    }
 }
 

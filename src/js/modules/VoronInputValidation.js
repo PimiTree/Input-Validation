@@ -88,6 +88,9 @@ export default class VoronInputValidation {
             }              
         })
     }
+    #autocompleteUrl () {
+        
+    }
     // service methods END
 
     // conditions START
@@ -131,10 +134,10 @@ export default class VoronInputValidation {
                 let value = e.target.value;             
                 let repeatStatus =  this.#isReapetPasword(input);
                 let validationStatus = repeatStatus ? false : this.regex[i].test(value);
-                this.#isReapetPasword(input);
+                // this.#isReapetPasword(input);
                 timer = setTimeout(() => {
                     if (validationStatus) {
-                        if (inputType[i] === 'url') {
+                        if (inputType[i] === 'url') {  
                            /(http:\/\/|https:\/\/)/.test(value) ? e.target.value = value : e.target.value = 'https://' + value;
                         }
                         this.#setValidApearence(input);

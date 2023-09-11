@@ -1,5 +1,5 @@
 
-.voron_field {
+.is_container {
     position: relative;
 }
 
@@ -28,6 +28,10 @@
     border-color: #fb1d1d;
     color: #fb1d1d;
 }
-
-
+.is_blocked {
+    cursor:not-allowed;
+}
+.is_unblocked {
+    cursor: pointer;
+}
 

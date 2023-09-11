@@ -56,7 +56,7 @@ export default class VoronInputValidation {
         this.form.removeEventListener('submit', this.#preventDefault);  
     }
     // prepare default state 
-    #setInitalState(inputs, inputType, inputsValidBundle) {
+    #setInitalState(inputs, inputType, inputsValidBundle) {  // refactored
         inputs.forEach((input, i)=> {
             if (inputType.includes(input.getAttribute('type'))) {  // set data sttribures form new password fields roles 
                 inputs[i-1].setAttribute("data-voron", 'password-main');
@@ -68,7 +68,7 @@ export default class VoronInputValidation {
         })
         ;
     }
-    #setMessageContainer () { // create containers for inputs and reassebmle inner HTML
+    #setMessageContainer () {// reafactored // create containers for inputs and reassebmle inner HTML
         [...this.form.querySelectorAll('*')].forEach((elem, i)=> {
             if (elem.tagName === 'INPUT') {
                 const inputWrapper = document.createElement('div');
@@ -85,9 +85,6 @@ export default class VoronInputValidation {
                 this.form.append(elem);
             }              
         })
-    }
-    #autocompleteUrl () {
-        
     }
     // service methods END
 

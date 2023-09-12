@@ -8,12 +8,14 @@ export default class VoronInputValidation {
             form: '[data-voron]',
             debounceDelay: 100,
             source: 'type', // paramater not works
+            limitedFileds: ['text', 'tel', 'name','password'],
             regex: {  
                 text: '^[a-zA-Zа-яёїА-ЯЇЁ\\s\\d\\-_:.,\\s]$',
                 name: '^[a-zA-Zа-яёїА-ЯЇЁ\\s\\d\\-_\\s]$',
                 email: '^[a-zA-Z_\\-0-9.]{2,}@[a-zA-Z]{2,}\\.[a-zA-Z]{2,}$',
                 tel: '^\\+*\\d$',
-                password: '^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[$^.*+?\\/{}\\[\\]()|@:,;\-_=<>%#~&!])[a-zA-Z\\d$^.*+?\\/{}\\[\\]()|@:,;-_=<>%#~&!]$',
+                password: '^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[$^.*+?/{}\\[\\]()|@:,;\\-_=<>%#~&!])[a-zA-Z\\d$^.*+?/{}\\[\\]()|@:,;-_=<>%#~&!]$',
+                            
                 url: '^(http:\\/\\/|https:\\/\\/)?([a-zA-Z_\\-0-9]{2,}\\.){1,}[a-zA-Z]{2,}[\\/?[a-zA-Z\\d?=%\\+_\\-&]*\\/?]*$',
             },
             errors: {
@@ -92,7 +94,13 @@ export default class VoronInputValidation {
         this.debounceDelay = props.debounceDelay;
         this.errors = props.errors;
         this.regex = props.regex;
-        this.#regexLimiter(props.regex);
+        this.limitedFileds = props.limitedFileds;
+        this.#regexLimiter(this.regex);
+         // control feature enable/disable => true/false
+        this.inputApearence = true;        // this not worck for now
+        this.buttonApearence = true;         // this not worck for now
+        this.inputMessage = true;           // this not worck for now
+        this.urlHTTPSAutocomplete = false;   // this not worck for now
        
         this.#init();
     };
@@ -103,11 +111,7 @@ export default class VoronInputValidation {
         inputsValidityBundle: [],
         isFormValid: false,     // servcie params
         passwordReapeat: false, // servcie params
-        // control feature enable/disable => true/false
-        inputApearence: true,        // this not worck for now
-        buttonApearence: true,         // this not worck for now
-        inputMessage: true,           // this not worck for now
-        urlHTTPSAutocomplete: false,   // this not worck for now
+       
     }
     #observableArray;
     // privat fields END
@@ -137,13 +141,11 @@ export default class VoronInputValidation {
         this.#state.inputsValidityBundle = [].fill.call({length: this.#state.inputs.length}, false); 
     }
     #regexLimiter(regex) {
-        this.regex.text = regex.text.slice(0, regex.text.length - 1) + '{' + this.errors.tooShort.text.length + ',' + this.errors.tooLong.text.length + '}' + regex.text.slice(-1);
+        const fields = this.limitedFileds;
 
-        this.regex.name = regex.name.slice(0, regex.name.length - 1) + '{' + this.errors.tooShort.name.length + ',' + this.errors.tooLong.name.length + '}' + regex.name.slice(-1);
-
-        this.regex.tel = regex.tel.slice(0, regex.tel.length - 1) + '{' + this.errors.tooShort.tel.length + ',' + this.errors.tooLong.tel.length + '}' + regex.tel.slice(-1);
-
-        this.regex.password = regex.password.slice(0, regex.password.length - 1) + '{' + this.errors.tooShort.password.length + ',' + this.errors.tooLong.password.length + '}' + regex.password.slice(-1);        
+        fields.forEach(field => {
+            this.regex[field] = `${regex[field].slice(0, regex[field].length - 1)}{${this.errors.tooShort[field].length},${this.errors.tooLong[field].length}}${regex.text.slice(-1)}`;
+        })
     }
     #setMessageContainer() { // create containers for inputs and reassebmle inner HTML
         this.formInnerElements.forEach(elem=> {
@@ -190,12 +192,6 @@ export default class VoronInputValidation {
             const repeatInputIndex = this.#state.inputs.indexOf(repeatPassword); 
 
             this.#state.passwordReapeat = mainPassword.value === repeatPassword.value ? true : false;
-
-            console.log(
-                this.#state.passwordReapeat + '\n',
-                regex + '\n',
-                input.value + '\n',
-            )
             const repeatPasswordValidity = this.#state.passwordReapeat ? regex.test(input.value) : false;
 
             this.#setInputState (repeatPassword, repeatInputIndex, repeatPasswordValidity);
@@ -399,4 +395,3 @@ export default class VoronInputValidation {
         this.#observeInputs();
     } 
 }
-

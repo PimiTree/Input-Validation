@@ -4,5 +4,13 @@ import VoronInputValidation from  './modules/VoronInputValidation.js';
 
 
 window.addEventListener('DOMContentLoaded', () =>{
-    let passwordValidation = new VoronInputValidation();  
+    let passwordValidation = new VoronInputValidation({
+        errors: {
+            tooShort: {
+                name: {
+                    length: 7,
+                }
+            }
+        }
+    });  
 });

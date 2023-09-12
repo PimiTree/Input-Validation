@@ -1,3 +1,6 @@
+import okImgUrl from '../../img/ok.svg';
+
+
 export default class VoronInputValidation {
     constructor(options = {}) {
         // Default parameters
@@ -6,12 +9,12 @@ export default class VoronInputValidation {
             debounceDelay: 100,
             source: 'type', // paramater not works
             regex: {  
-                text: /^[a-zA-Zа-яёїА-ЯЇЁ\s\d\-_:.,\s]*$/,
-                name: /^[a-zA-Zа-яёїА-ЯЇЁ\s\d\-_\s]{3,}$/,
-                email: /^[a-zA-Z_\-\0-9.]{2,}@[a-zA-Z]{2,}\.[a-zA-Z]{2,}$/,
-                tel: /^\+*\d{7,}$/,
-                password: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[$^.*+?\/{}\[\]()|@:,;\-_=<>%#~&!])[a-zA-Z\d$^.*+?\/{}\[\]()|@:,;-_=<>%#~&!]{5,}$/,
-                url: /^(http:\/\/|https:\/\/)?([a-zA-Z_\-0-9]{2,}\.){1,}[a-zA-Z]{2,}[\/?[a-zA-Z\d?=%\+_\-&]*\/?]*$/,
+                text: '^[a-zA-Zа-яёїА-ЯЇЁ\\s\\d\\-_:.,\\s]$',
+                name: '^[a-zA-Zа-яёїА-ЯЇЁ\\s\\d\\-_\\s]$',
+                email: '^[a-zA-Z_\\-0-9.]{2,}@[a-zA-Z]{2,}\\.[a-zA-Z]{2,}$',
+                tel: '^\\+*\\d$',
+                password: '^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[$^.*+?\\/{}\\[\\]()|@:,;\-_=<>%#~&!])[a-zA-Z\\d$^.*+?\\/{}\\[\\]()|@:,;-_=<>%#~&!]$',
+                url: '^(http:\\/\\/|https:\\/\\/)?([a-zA-Z_\\-0-9]{2,}\\.){1,}[a-zA-Z]{2,}[\\/?[a-zA-Z\\d?=%\\+_\\-&]*\\/?]*$',
             },
             errors: {
                 wrongSymbol: 'Allowed a-z, 0-9, spaces, -_:,.',
@@ -76,26 +79,21 @@ export default class VoronInputValidation {
                             begining: 'Max', 
                             ending: 'symbols'
                         },
-                        length: 20,
+                        length: 10,
                     },
                 },
             },            
         };
 
-        const props = { ...defaultProps, ...options };
+        const props = this.#mergeProps(defaultProps, options);
     
         this.form = document.querySelector(props.form);
         this.formInnerElements = [...this.form.querySelectorAll('*')];
         this.debounceDelay = props.debounceDelay;
-        this.regex = props.regex;
         this.errors = props.errors;
-
-        // control feature enable/disable => true/false
-        this.inputApearence = true;         // this not worck for now
-        this.buttonApearence = true;         // this not worck for now
-        this.inputMessage = true;           // this not worck for now
-        this.urlHTTPSAutocomplete = false   // this not worck for now
-
+        this.regex = props.regex;
+        this.#regexLimiter(props.regex);
+       
         this.#init();
     };
     
@@ -103,13 +101,28 @@ export default class VoronInputValidation {
     #state = {
         inputs: [],  // already filed up
         inputsValidityBundle: [],
-        isFormValid: false,
-        passwordReapeat: false,
+        isFormValid: false,     // servcie params
+        passwordReapeat: false, // servcie params
+        // control feature enable/disable => true/false
+        inputApearence: true,        // this not worck for now
+        buttonApearence: true,         // this not worck for now
+        inputMessage: true,           // this not worck for now
+        urlHTTPSAutocomplete: false,   // this not worck for now
     }
     #observableArray;
     // privat fields END
 
     //service Foo START
+    #mergeProps(props, options) {
+        for (const [key,value] of Object.entries(options)) {    
+            if (typeof value === 'object' && props[key]) {
+                this.#mergeProps(props[key], value);
+            } else {
+                props[key] = value;
+            }
+        }
+        return props;
+    }
     #preventDefault(e) {
         e.preventDefault();
     }
@@ -122,6 +135,15 @@ export default class VoronInputValidation {
     #setInitalState() {
         this.#state.inputs = [...this.form.querySelectorAll('input')];
         this.#state.inputsValidityBundle = [].fill.call({length: this.#state.inputs.length}, false); 
+    }
+    #regexLimiter(regex) {
+        this.regex.text = regex.text.slice(0, regex.text.length - 1) + '{' + this.errors.tooShort.text.length + ',' + this.errors.tooLong.text.length + '}' + regex.text.slice(-1);
+
+        this.regex.name = regex.name.slice(0, regex.name.length - 1) + '{' + this.errors.tooShort.name.length + ',' + this.errors.tooLong.name.length + '}' + regex.name.slice(-1);
+
+        this.regex.tel = regex.tel.slice(0, regex.tel.length - 1) + '{' + this.errors.tooShort.tel.length + ',' + this.errors.tooLong.tel.length + '}' + regex.tel.slice(-1);
+
+        this.regex.password = regex.password.slice(0, regex.password.length - 1) + '{' + this.errors.tooShort.password.length + ',' + this.errors.tooLong.password.length + '}' + regex.password.slice(-1);        
     }
     #setMessageContainer() { // create containers for inputs and reassebmle inner HTML
         this.formInnerElements.forEach(elem=> {
@@ -157,6 +179,33 @@ export default class VoronInputValidation {
         })
         return false;
     }
+    #isInputValid(input) {
+        const inputType = input.getAttribute('type');
+        const regex = new RegExp (this.regex[inputType]);
+        const inputValidity = regex.test(input.value);
+        const mainPassword = this.form.querySelector('[data-voron="password-main"]');
+        const repeatPassword = this.form.querySelector('[data-voron="password-repeat"]');
+    
+        if (input == mainPassword) {
+            const repeatInputIndex = this.#state.inputs.indexOf(repeatPassword); 
+
+            this.#state.passwordReapeat = mainPassword.value === repeatPassword.value ? true : false;
+
+            console.log(
+                this.#state.passwordReapeat + '\n',
+                regex + '\n',
+                input.value + '\n',
+            )
+            const repeatPasswordValidity = this.#state.passwordReapeat ? regex.test(input.value) : false;
+
+            this.#setInputState (repeatPassword, repeatInputIndex, repeatPasswordValidity);
+        } else if (input == repeatPassword) {
+            this.#state.passwordReapeat = mainPassword.value === repeatPassword.value ? true : false;
+
+            return this.#state.passwordReapeat ? true : false;
+        }
+        return inputValidity;
+    }
     #setInputState (input, i, inputValidity) {
         if (inputValidity) {
             this.#setValidApearence(input);
@@ -168,27 +217,7 @@ export default class VoronInputValidation {
             this.#setMessage(input, inputValidity);
         }
     }
-    #isInputValid(input) {
-        const inputType = input.getAttribute('type');
-        const inputValidity = this.regex[inputType].test(input.value);
-        const mainPassword = this.form.querySelector('[data-voron="password-main"]');
-        const repeatPassword = this.form.querySelector('[data-voron="password-repeat"]');
-        
-       
-        if (input == mainPassword) {
-            const repeatInputIndex = this.#state.inputs.indexOf(repeatPassword); 
-
-            this.#state.passwordReapeat = mainPassword.value === repeatPassword.value ? true : false;
-            const repeatPasswordValidity = this.#state.passwordReapeat ? this.regex[inputType].test(input.value) : false;
-
-            this.#setInputState (repeatPassword, repeatInputIndex, repeatPasswordValidity);
-        } else if (input == repeatPassword) {
-            this.#state.passwordReapeat = mainPassword.value === repeatPassword.value ? true : false;
-
-            return this.#state.passwordReapeat ? true : false;
-        }
-        return inputValidity;
-    }
+    
     #isFormValid = () => {
         let arr = [];
         for (let i = 0; i < this.#observableArray.arr.length; i++) {
@@ -299,7 +328,7 @@ export default class VoronInputValidation {
     }
     #createImgForValidMessage() {
         const img = document.createElement('img');
-        img.setAttribute('src', '../img/ok.svg');
+        img.setAttribute('src', okImgUrl);
         img.classList.add('is_valid_img');
 
         return img;

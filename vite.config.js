@@ -9,6 +9,7 @@ export default defineConfig(() => {
         outDir: '../dist',
         assetsDir: '',
         assetsInlineLimit: 0,
+        assetsInclude: ['img/*.svg'],
         rollupOptions: {
           output: {
             entryFileNames: 'js/[name]-[hash].js',

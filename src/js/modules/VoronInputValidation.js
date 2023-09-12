@@ -4,9 +4,10 @@ export default class VoronInputValidation {
         const defaultProps = {
             form: '[data-voron]',
             debounceDelay: 100,
+            source: 'type', // paramater not works
             regex: {  
-                text: /^[a-zA-Zа-яёїА-ЯЇЁ\s\d\-_:.,\s]+$/,
-                name: /^[a-zA-Zа-яёїА-ЯЇЁ\s\d\-_\s]{3,20}$/,
+                text: /^[a-zA-Zа-яёїА-ЯЇЁ\s\d\-_:.,\s]*$/,
+                name: /^[a-zA-Zа-яёїА-ЯЇЁ\s\d\-_\s]{3,}$/,
                 email: /^[a-zA-Z_\-\0-9.]{2,}@[a-zA-Z]{2,}\.[a-zA-Z]{2,}$/,
                 tel: /^\+*\d{7,}$/,
                 password: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[$^.*+?\/{}\[\]()|@:,;\-_=<>%#~&!])[a-zA-Z\d$^.*+?\/{}\[\]()|@:,;-_=<>%#~&!]{5,}$/,
@@ -18,22 +19,67 @@ export default class VoronInputValidation {
                 minConditions:  'one lower and uppercase, one number and one special char ($^.*+?/{}[]()|@:,;-_=<>%#~&!)',
                 passNotEquals: 'passwords must be the same',
                 wrongLink:  'It is not link',
-                tooLong:  {
-                    mes: 'Max 20 symbols',
-                    // length: {
-                    //     text: ,
-                    //     name: ,
-                    //     tel: ,
-                    //     password: ,
-                    // },
-                },
                 tooShort: {
-                    mes: 'Min 2 symbols',
-                    length: 2,
+                    text: {
+                        mes: {
+                            begining: 'Min', 
+                            ending: 'symbols'
+                        },
+                        length: 2,
+                   },
+                   name: {
+                        mes: {
+                            begining: 'Min', 
+                            ending: 'symbols'
+                        },
+                        length: 3,
+                   },
+                   tel: {
+                        mes: {
+                            begining: 'Min', 
+                            ending: 'symbols'
+                        },
+                        length: 10,
+                   },
+                   password: {
+                        mes: {
+                            begining: 'Min', 
+                            ending: 'symbols'
+                        },
+                        length: 5,
+                   },
                 },
-            },
-            dataAttrMode: 'disable',  // ?can be enable check README?
-            
+                tooLong:  {
+                    text: {
+                        mes: {
+                            begining: 'Max', 
+                            ending: 'symbols'
+                        },
+                        length: 50,
+                    },
+                    name: {
+                        mes: {
+                            begining: 'Max', 
+                            ending: 'symbols'
+                        },
+                        length: 20,
+                    },
+                    tel: {
+                        mes: {
+                            begining: 'Max', 
+                            ending: 'symbols'
+                        },
+                        length: 20,
+                    },
+                    password: {
+                        mes: {
+                            begining: 'Max', 
+                            ending: 'symbols'
+                        },
+                        length: 20,
+                    },
+                },
+            },            
         };
 
         const props = { ...defaultProps, ...options };
@@ -44,7 +90,7 @@ export default class VoronInputValidation {
         this.regex = props.regex;
         this.errors = props.errors;
 
-        // control feature enable/disable
+        // control feature enable/disable => true/false
         this.inputApearence = true;         // this not worck for now
         this.buttonApearence = true;         // this not worck for now
         this.inputMessage = true;           // this not worck for now
@@ -111,13 +157,37 @@ export default class VoronInputValidation {
         })
         return false;
     }
+    #setInputState (input, i, inputValidity) {
+        if (inputValidity) {
+            this.#setValidApearence(input);
+            this.#observableArray.arr[i] = true;
+            this.#setMessage(input, inputValidity);
+        } else {
+            this.#setInvalidApearence(input);
+            this.#observableArray.arr[i] = false;
+            this.#setMessage(input, inputValidity);
+        }
+    }
     #isInputValid(input) {
-        const regexType = input.getAttribute('type');
-        const thisInputIsForRepeat = input.getAttribute('data-voron') == 'password-repeat';
-        const thisInputIsEqualToOther = input.value !== this.form.querySelector('[data-voron="password-main"]').value;
-        this.#state.passwordReapeat = thisInputIsForRepeat && thisInputIsEqualToOther;
+        const inputType = input.getAttribute('type');
+        const inputValidity = this.regex[inputType].test(input.value);
+        const mainPassword = this.form.querySelector('[data-voron="password-main"]');
+        const repeatPassword = this.form.querySelector('[data-voron="password-repeat"]');
+        
+       
+        if (input == mainPassword) {
+            const repeatInputIndex = this.#state.inputs.indexOf(repeatPassword); 
 
-        return this.#state.passwordReapeat ? false : this.regex[regexType].test(input.value);
+            this.#state.passwordReapeat = mainPassword.value === repeatPassword.value ? true : false;
+            const repeatPasswordValidity = this.#state.passwordReapeat ? this.regex[inputType].test(input.value) : false;
+
+            this.#setInputState (repeatPassword, repeatInputIndex, repeatPasswordValidity);
+        } else if (input == repeatPassword) {
+            this.#state.passwordReapeat = mainPassword.value === repeatPassword.value ? true : false;
+
+            return this.#state.passwordReapeat ? true : false;
+        }
+        return inputValidity;
     }
     #isFormValid = () => {
         let arr = [];
@@ -144,56 +214,55 @@ export default class VoronInputValidation {
            try { // if we got in_valid try to remove okImg
                input.nextSibling.querySelector('.is_valid_img').remove();
            } catch (e) {};
-           input.value.length === 0 ? input.nextSibling.textContent = "" : this.#prepareErrorMessage(input); 
-       }    
-       
+           input.value.length === 0 ? input.nextSibling.textContent = "" : this.#chooseErrorMessage(input); 
+       }     
     }
-    #prepareErrorMessage(input) {
+    #chooseErrorMessage(input) {
         const inputType = input.getAttribute('type');
         const messageContainer = input.nextSibling;
         const value = input.value;
+        const tooShort = this.errors.tooShort[inputType];
+        const tooLong = this.errors.tooLong[inputType];
 
-        // messageContainer.textConten = "";
-        
+        const isPaswordFitMinimalConditions = !/[a-z]{1}/.test(value) || !/[A-Z]{1}/.test(value) || !/[0-9]{1}/.test(value) || !/[$^.*+?\/{}\[\]()|@:,;\-_=<>%#~&!]{1}/.test(value);
+
+        const erorrMesConditionTemplate = () => {
+            if (value.length < tooShort.length) {
+                messageContainer.textContent = this.#prepareErrorMessage(tooShort);
+            } else if (value.length >= tooLong.length) {
+                messageContainer.textContent =  this.#prepareErrorMessage(tooLong);
+            } else if (inputType === 'password') {
+                if (isPaswordFitMinimalConditions) {
+                    messageContainer.textContent = this.errors.minConditions;
+                } else if (!this.#state.passwordReapeat) {
+                    messageContainer.textContent = this.errors.passNotEquals;
+                }
+            } else {
+                messageContainer.textContent = this.errors.wrongSymbol;
+            }
+        }
+
         switch (inputType) {
             case 'text': 
-                messageContainer.textContent = this.errors.wrongSymbol;
-                break;
             case 'name': 
-                if (value.length < 3) {
-                    messageContainer.textContent = this.errors.tooShort.mes;
-                } else if (value.length >= 20) {
-                    messageContainer.textContent = this.errors.tooLong.mes;
-                } else {
-                    messageContainer.textContent = this.errors.wrongSymbol;
-                }
-                console.log(this.errors.wrongSymbol);
+            case 'tel':
+            case 'password': 
+                erorrMesConditionTemplate();
                 break;
             case 'email': 
                     messageContainer.textContent = this.errors.notEmail; 
-                break;
-            case 'tel':
-                if (value.length <= 7) {
-                    messageContainer.textContent = this.errors.tooShort.mes;
-                } else if (value.length >= 25) {
-                    messageContainer.textContent = this.errors.tooLong.mes;
-                } else {
-                    messageContainer.textContent = this.errors.wrongSymbol;
-                }
-                break;
-            case 'password': 
-                if (value.length <= 5) {
-                    messageContainer.textContent = this.errors.tooShort.mes;
-                } else if (!/[a-z]{1}/.test(value) || !/[A-Z]{1}/.test(value) || !/[0-9]{1}/.test(value) || !/[$^.*+?\/{}\[\]()|@:,;\-_=<>%#~&!]{1}/.test(value) ) {
-                    messageContainer.textContent = this.errors.minConditions;
-                } else if (this.#state.passwordReapeat) {
-                    messageContainer.textContent = this.errors.passNotEquals;
-                }
                 break;
             case 'url': 
                 messageContainer.textContent = this.errors.wrongLink;
                 break;
         }
+    }
+    #prepareErrorMessage(location) {
+        const mesBegining = location.mes.begining;
+        const mesEnding = location.mes.ending;
+        const mesLength = location.length;
+
+        return `${mesBegining} ${mesLength} ${mesEnding}`;
     }
     // messaging END
 
@@ -282,15 +351,7 @@ export default class VoronInputValidation {
                 this.#setInputAutocomplete(input);
                 clearTimeout(timer);        // debouncing
                 timer = setTimeout(() => { // debouncing
-                    if (inputValidity) {
-                        this.#setValidApearence(input);
-                        this.#observableArray.arr[i] = true;
-                        this.#setMessage(input, inputValidity);
-                    } else {
-                        this.#setInvalidApearence(input);
-                        this.#observableArray.arr[i] = false;
-                        this.#setMessage(input, inputValidity);
-                    }
+                    this.#setInputState (input, i, inputValidity)
                 }, this.debounceDelay);
             });
         })

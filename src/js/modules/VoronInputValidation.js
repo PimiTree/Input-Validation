@@ -2,6 +2,7 @@ import okImgUrl from '../../img/ok.svg';
 
 
 export default class VoronInputValidation {
+    
     constructor(options = {}) {
         // Default parameters
         const defaultProps = {
@@ -89,8 +90,9 @@ export default class VoronInputValidation {
             },            
         };
 
-        const props = this.#mergeProps(defaultProps, options);
-    
+        const props = this.#mergeProps(defaultProps, options); // merge default and user params
+
+        // class parameters for use in class Body Start
         this.form = document.querySelector(props.form);
         this.formInnerElements = [...this.form.querySelectorAll('*')];
         this.debounceDelay = props.debounceDelay;
@@ -101,26 +103,24 @@ export default class VoronInputValidation {
         this.regex = props.regex;
         this.limitedFileds = props.limitedFileds;
         this.#regexLimiter(this.regex);
-         // control feature enable/disable => true/false
         this.inputApearence = true;        // this not worck for now
         this.buttonApearence = true;         // this not worck for now
-        this.inputMessage = true;           // this not worck for now
         this.urlHTTPSAutocomplete = false;   // this not worck for now
-       
-        this.#init();
+        // class parameters for use in class Body END
+
+        this.#init();  // start the logic
     };
     
-    // privat fields START
-    #state = {
-        inputs: [],  // already filed up
+    // privat fields START 
+    #state = {  // service object, contain states and some elements
+        inputs: [], 
         inputsValidityBundle: [],
-        isFormValid: false,     // servcie params
-        passwordReapeat: false, // servcie params
-        
+        isFormValid: false,     
+        passwordReapeat: false, 
     }
-    #observableArray;
+    #observableArray;  // array for proxe observer
 
-    #styles = {
+    #styles = {  // service object for style control
         position: {
             top : `
                 transform: translateY(-100%);
@@ -144,7 +144,7 @@ export default class VoronInputValidation {
     // privat fields END
 
     //service Foo START
-    #mergeProps(props, options) {
+    #mergeProps(props, options) {  // merge default and user params  
         for (const [key,value] of Object.entries(options)) {    
             if (typeof value === 'object' && props[key]) {
                 this.#mergeProps(props[key], value);
@@ -157,24 +157,24 @@ export default class VoronInputValidation {
     #preventDefault(e) {
         e.preventDefault();
     }
-    #disableFormSubmit() {
+    #disableFormSubmit() {  // blocking form submit
         this.form.addEventListener('submit', this.#preventDefault); 
     }
-    #enableFormSubmit() {
+    #enableFormSubmit() {   // unblocking form submit
         this.form.removeEventListener('submit', this.#preventDefault);  
     }
-    #setInitalState() {
+    #setInitalState() { // fill up two main arrays - inputs siquence and default validity of them
         this.#state.inputs = [...this.form.querySelectorAll('input')];
         this.#state.inputsValidityBundle = [].fill.call({length: this.#state.inputs.length}, false); 
     }
-    #regexLimiter(regex) {
+    #regexLimiter(regex) { // by default regex is string - function add to string {min,max} parameters and create regex
         const fields = this.limitedFileds;
 
         fields.forEach(field => {
             this.regex[field] = `${regex[field].slice(0, regex[field].length - 1)}{${this.errors.tooShort[field].length},${this.errors.tooLong[field].length}}${regex.text.slice(-1)}`;
         })
     }
-    #setMessageContainer() { // create containers for inputs and reassebmle inner HTML
+    #setMessageContainer() { // create containers for inputs, reassebmle inner HTML
         if (this.containering) {
             this.formInnerElements.forEach(elem=> {
                 if (elem.tagName === 'INPUT') {
@@ -183,7 +183,7 @@ export default class VoronInputValidation {
                     inputWrapper.append(elem);
                     this.form.append(inputWrapper);
     
-                    if (this.messaging) {
+                    if (this.messaging) {  // create message container 
                         const message = document.createElement('div');     
                         message.classList.add('is_message');
                         message.style.cssText = this.#styles.position[this.position];
@@ -196,12 +196,10 @@ export default class VoronInputValidation {
         }
         
     }
-    #setInputAutocomplete(input) {
-        if (input.getAttribute('type') === 'url') { 
-            /(http:\/\/|https:\/\/)/.test(input.value) ? true : input.value = 'https://' + input.value;
-        }
+    #setInputAutocomplete(input) { // trun on https autocomplete for input[typr='url']
+        /(http:\/\/|https:\/\/)/.test(input.value) ? true : input.value = 'https://' + input.value;
     }
-    #isFormNeedReapeatPassword() {
+    #isFormNeedReapeatPassword() { // if form has two inputs passwrod will eneble paswords compare
         let passwrodInputCount = 0;
         this.#state.inputs.forEach((input, i)=> {
             const isPassword = input.getAttribute('type') === 'password';
@@ -213,7 +211,7 @@ export default class VoronInputValidation {
         })
         return false;
     }
-    #isInputValid(input) {
+    #isInputValid(input) {  // check input validity 
         const inputType = input.getAttribute('type');
         const regex = new RegExp (this.regex[inputType]);
         const inputValidity = regex.test(input.value);
@@ -234,7 +232,7 @@ export default class VoronInputValidation {
         }
         return inputValidity;
     }
-    #setInputState (input, i, inputValidity) {
+    #setInputState (input, i, inputValidity) {  // set state, aplly apearense and inject message
         if (inputValidity) {
             this.#setValidApearence(input);
             this.#observableArray.arr[i] = true;
@@ -246,7 +244,7 @@ export default class VoronInputValidation {
         }
     }
     
-    #isFormValid = () => {
+    #isFormValid = () => {  // checing form validity
         let arr = [];
         for (let i = 0; i < this.#observableArray.arr.length; i++) {
             arr[i] = this.#observableArray.arr[i];
@@ -259,32 +257,52 @@ export default class VoronInputValidation {
     //service Foo END  
 
     // messaging START
-    #setMessage(input, inputValidity) {
+    #setMessage(input, inputValidity) {  // inject valid or invalid message
         if (this.messaging) {
             if (inputValidity) { // if true append okmessage 
                 if (!input.nextSibling.querySelector('.is_valid_img')) {
                     const okImg = this.#createImgForValidMessage();
                     // if okImg img already exist not try append
-                    input.nextSibling.textContent = ""; 
+                    input.nextSibling.textContent = "";  // clear if has text message
                     input.nextSibling.append(okImg);     
                 }    
             } else {
                 try { // if we got in_valid try to remove okImg
                     input.nextSibling.querySelector('.is_valid_img').remove();
                 } catch (e) {};
+                // if input value empty not insert any messege
                 input.value.length === 0 ? input.nextSibling.textContent = "" : this.#chooseErrorMessage(input); 
             }    
         } 
     }
     #chooseErrorMessage(input) {
+        // set initial variables
         const inputType = input.getAttribute('type');
         const messageContainer = input.nextSibling;
         const value = input.value;
         const tooShort = this.errors.tooShort[inputType];
         const tooLong = this.errors.tooLong[inputType];
 
+        // set additional conition for message picking
         const isPaswordFitMinimalConditions = !/[a-z]{1}/.test(value) || !/[A-Z]{1}/.test(value) || !/[0-9]{1}/.test(value) || !/[$^.*+?\/{}\[\]()|@:,;\-_=<>%#~&!]{1}/.test(value);
 
+        // choose message according to input type
+        switch (inputType) {
+            case 'text': 
+            case 'name': 
+            case 'tel':
+            case 'password': 
+                erorrMesConditionTemplate();
+                break;
+            case 'email': 
+                messageContainer.textContent = this.errors.notEmail; 
+                break;
+            case 'url': 
+                messageContainer.textContent = this.errors.wrongLink;
+                break;
+        }
+
+        // standart template for messaging
         const erorrMesConditionTemplate = () => {
             if (value.length < tooShort.length) {
                 messageContainer.textContent = this.#prepareErrorMessage(tooShort);
@@ -296,26 +314,10 @@ export default class VoronInputValidation {
                 } else if (!this.#state.passwordReapeat) {
                     messageContainer.textContent = this.errors.passNotEquals;
                 }
-            } else {
-                messageContainer.textContent = this.errors.wrongSymbol;
-            }
-        }
-
-        switch (inputType) {
-            case 'text': 
-            case 'name': 
-            case 'tel':
-            case 'password': 
-                erorrMesConditionTemplate();
-                break;
-            case 'email': 
-                    messageContainer.textContent = this.errors.notEmail; 
-                break;
-            case 'url': 
-                messageContainer.textContent = this.errors.wrongLink;
-                break;
+            } 
         }
     }
+    // assemble min max message
     #prepareErrorMessage(location) {
         const mesBegining = location.mes.begining;
         const mesEnding = location.mes.ending;
@@ -326,7 +328,7 @@ export default class VoronInputValidation {
     // messaging END
 
     // VUE functions START
-    #setFocusStyle() {
+    #setFocusStyle() {  
         this.#state.inputs.forEach(input => {
             input.classList.add('is_focused');
         })
@@ -366,58 +368,67 @@ export default class VoronInputValidation {
     // VUE functions END
 
        // custom event listener START
-       #createObservableArray = (arr) => {
+    #createObservableArray = (arr) => { 
         const observers = new Set();
 
         const notifyObservers = () => {
-          for (const observer of observers) {
+            for (const observer of observers) {
             observer(arr);
-          }
+            }
         };
 
-        const arrayProxy = new Proxy(arr, {
-          set(target, property, value) {
+        const arrayProxy = new Proxy(arr, {  // proxy object
+            set(target, property, value) {
             target[property] = value;
             notifyObservers();
             return true;
-          },
+            },
         });
-      
+        
         const addObserver = (observer) => {
-          observers.add(observer);
+            observers.add(observer);
         };
-      
+        
         const removeObserver = (observer) => {
-          observers.delete(observer);
+            observers.delete(observer);
         };
-      
+        
         return {
-          arr: arrayProxy,
-          addObserver,
-          removeObserver,
+            arr: arrayProxy,
+            addObserver,
+            removeObserver,
         };
     };
      // custom event listener END
 
 
     // main Event START
-    #observeInputs() {
+    #observeInputs() { 
         this.#state.inputs.forEach((input, i)=> {
+            
             let timer;
+
             input.addEventListener('input', () => {
                 const isInputRequired = input.getAttribute('required') !== null;
-               if (isInputRequired) { const inputValidity =  this.#isInputValid(input); // 
-                this.#setInputAutocomplete(input);
-                clearTimeout(timer);        // debouncing
-                timer = setTimeout(() => { // debouncing
-                    this.#setInputState (input, i, inputValidity)
-                }, this.debounceDelay);}
+
+                if (isInputRequired) { 
+                    const inputValidity =  this.#isInputValid(input); // check input validity before timeout
+
+                    if (input.getAttribute('type') === 'url') {
+                        this.#setInputAutocomplete(input); // if this input is url type need https:// autofill
+                    }
+                    
+                    clearTimeout(timer);        // debouncing
+                    timer = setTimeout(() => { // debouncing
+                        this.#setInputState (input, i, inputValidity); 
+                    }, this.debounceDelay);
+                }
             });
         })
     }
     // main Event END
-
-    #init() {
+ 
+    #init() {  
         this.#disableFormSubmit();
         this.#setButtonApearence();
         this.#setInitalState();

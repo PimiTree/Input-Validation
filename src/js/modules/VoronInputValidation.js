@@ -9,6 +9,8 @@ export default class VoronInputValidation {
             debounceDelay: 100,
             source: 'type', // paramater not works
             position: 'right',
+            containering: true,
+            messaging: true,
             limitedFileds: ['text', 'tel', 'name','password'],
             regex: {  
                 text: '^[a-zA-Zа-яёїА-ЯЇЁ\\s\\d\\-_:.,\\s]$',
@@ -92,6 +94,8 @@ export default class VoronInputValidation {
         this.form = document.querySelector(props.form);
         this.formInnerElements = [...this.form.querySelectorAll('*')];
         this.debounceDelay = props.debounceDelay;
+        this.containering = props.containering;
+        this.messaging = props.messaging;
         this.position = props.position;
         this.errors = props.errors;
         this.regex = props.regex;
@@ -122,7 +126,7 @@ export default class VoronInputValidation {
                 transform: translateY(-100%);
                 top: 0;
             `,
-            rigth: `
+            right: `
                 transform: translateX(100%);
                 top: 0;
                 right: 0;
@@ -171,22 +175,26 @@ export default class VoronInputValidation {
         })
     }
     #setMessageContainer() { // create containers for inputs and reassebmle inner HTML
-        this.formInnerElements.forEach(elem=> {
-            if (elem.tagName === 'INPUT') {
-                const inputWrapper = document.createElement('div');
-                inputWrapper.classList.add('is_container');
-                inputWrapper.append(elem);
-                
-                const message = document.createElement('div');     
-                message.classList.add('is_message');
-                message.style.cssText = this.#styles.position[this.position];
-                console.log(this.#styles.position[this.position]);
-                this.form.append(inputWrapper);
-                inputWrapper.append(message);
-            } else {
-                this.form.append(elem);
-            }              
-        })
+        if (this.containering) {
+            this.formInnerElements.forEach(elem=> {
+                if (elem.tagName === 'INPUT') {
+                    const inputWrapper = document.createElement('div');
+                    inputWrapper.classList.add('is_container');
+                    inputWrapper.append(elem);
+                    this.form.append(inputWrapper);
+    
+                    if (this.messaging) {
+                        const message = document.createElement('div');     
+                        message.classList.add('is_message');
+                        message.style.cssText = this.#styles.position[this.position];
+                        inputWrapper.append(message);
+                    }
+                } else {
+                    this.form.append(elem);
+                }              
+            })
+        }
+        
     }
     #setInputAutocomplete(input) {
         if (input.getAttribute('type') === 'url') { 
@@ -252,19 +260,21 @@ export default class VoronInputValidation {
 
     // messaging START
     #setMessage(input, inputValidity) {
-        if (inputValidity) { // if true append okmessage 
-           if (!input.nextSibling.querySelector('.is_valid_img')) {
-               const okImg = this.#createImgForValidMessage();
-               // if okImg img already exist not try append
-               input.nextSibling.textContent = ""; 
-               input.nextSibling.append(okImg);     
-           }    
-       } else {
-           try { // if we got in_valid try to remove okImg
-               input.nextSibling.querySelector('.is_valid_img').remove();
-           } catch (e) {};
-           input.value.length === 0 ? input.nextSibling.textContent = "" : this.#chooseErrorMessage(input); 
-       }     
+        if (this.messaging) {
+            if (inputValidity) { // if true append okmessage 
+                if (!input.nextSibling.querySelector('.is_valid_img')) {
+                    const okImg = this.#createImgForValidMessage();
+                    // if okImg img already exist not try append
+                    input.nextSibling.textContent = ""; 
+                    input.nextSibling.append(okImg);     
+                }    
+            } else {
+                try { // if we got in_valid try to remove okImg
+                    input.nextSibling.querySelector('.is_valid_img').remove();
+                } catch (e) {};
+                input.value.length === 0 ? input.nextSibling.textContent = "" : this.#chooseErrorMessage(input); 
+            }    
+        } 
     }
     #chooseErrorMessage(input) {
         const inputType = input.getAttribute('type');

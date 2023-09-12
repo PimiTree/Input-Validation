@@ -12,7 +12,10 @@ window.addEventListener('DOMContentLoaded', () =>{
                 }
             }
         },
+        containering: true,
+        messaging: true,
         position: 'left',
+       
 
     });  
 });

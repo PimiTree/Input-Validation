@@ -2,9 +2,16 @@
 .is_container {
     position: relative;
 }
-
+[data-voron] button {
+    padding: 10px 25px;
+    border-radius: 30px; 
+}
+.is_container input {
+    padding: 10px 25px;
+    border-radius: 30px;
+}
 .is_message {
-    padding: 0px 15px;
+    padding: 0px 10px;
     box-sizing: border-box;
     position: absolute;
     transform: translateX(100%);
@@ -16,7 +23,8 @@
     width: max-content;
 }
 .is_valid_img {
-    height: 50%;
+    height: 20px;
+    width: 20px;
 }
 .is_focused:focus {
     border: 1px solid #000000c9;
@@ -29,9 +37,11 @@
     color: #fb1d1d;
 }
 .is_blocked {
+    opacity: 0.5;
     cursor:not-allowed;
 }
 .is_unblocked {
+    background-color: white;
     cursor: pointer;
 }
 

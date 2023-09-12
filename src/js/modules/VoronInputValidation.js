@@ -370,14 +370,14 @@ export default class VoronInputValidation {
     #observeInputs() {
         this.#state.inputs.forEach((input, i)=> {
             let timer;
-            input.addEventListener('input', (e) => {
-
-                const inputValidity =  this.#isInputValid(input); // 
+            input.addEventListener('input', () => {
+                const isInputRequired = input.getAttribute('required') !== null;
+               if (isInputRequired) { const inputValidity =  this.#isInputValid(input); // 
                 this.#setInputAutocomplete(input);
                 clearTimeout(timer);        // debouncing
                 timer = setTimeout(() => { // debouncing
                     this.#setInputState (input, i, inputValidity)
-                }, this.debounceDelay);
+                }, this.debounceDelay);}
             });
         })
     }

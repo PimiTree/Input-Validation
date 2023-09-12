@@ -8,7 +8,7 @@ window.addEventListener('DOMContentLoaded', () =>{
         errors: {
             tooShort: {
                 name: {
-                    length: 7,
+                    length: 1,
                 }
             }
         }

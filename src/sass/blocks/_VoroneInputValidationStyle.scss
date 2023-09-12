@@ -14,9 +14,6 @@
     padding: 0px 10px;
     box-sizing: border-box;
     position: absolute;
-    transform: translateX(100%);
-    top: 0;
-    right: 0;
     display: flex;
     align-items: center;
     height: 100%;
@@ -32,7 +29,7 @@
 .is_valid {
     border-color: #1cce1cbf;
 }
-.is_invalid:focus {
+.is_invalid {
     border-color: #fb1d1d;
     color: #fb1d1d;
 }

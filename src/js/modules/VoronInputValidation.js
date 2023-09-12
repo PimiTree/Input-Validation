@@ -8,14 +8,14 @@ export default class VoronInputValidation {
             form: '[data-voron]',
             debounceDelay: 100,
             source: 'type', // paramater not works
+            position: 'right',
             limitedFileds: ['text', 'tel', 'name','password'],
             regex: {  
                 text: '^[a-zA-Zа-яёїА-ЯЇЁ\\s\\d\\-_:.,\\s]$',
                 name: '^[a-zA-Zа-яёїА-ЯЇЁ\\s\\d\\-_\\s]$',
                 email: '^[a-zA-Z_\\-0-9.]{2,}@[a-zA-Z]{2,}\\.[a-zA-Z]{2,}$',
                 tel: '^\\+*\\d$',
-                password: '^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[$^.*+?/{}\\[\\]()|@:,;\\-_=<>%#~&!])[a-zA-Z\\d$^.*+?/{}\\[\\]()|@:,;-_=<>%#~&!]$',
-                            
+                password: '^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[$^.*+?/{}\\[\\]()|@:,;\\-_=<>%#~&!])[a-zA-Z\\d$^.*+?/{}\\[\\]()|@:,;-_=<>%#~&!]$',                          
                 url: '^(http:\\/\\/|https:\\/\\/)?([a-zA-Z_\\-0-9]{2,}\\.){1,}[a-zA-Z]{2,}[\\/?[a-zA-Z\\d?=%\\+_\\-&]*\\/?]*$',
             },
             errors: {
@@ -92,6 +92,7 @@ export default class VoronInputValidation {
         this.form = document.querySelector(props.form);
         this.formInnerElements = [...this.form.querySelectorAll('*')];
         this.debounceDelay = props.debounceDelay;
+        this.position = props.position;
         this.errors = props.errors;
         this.regex = props.regex;
         this.limitedFileds = props.limitedFileds;
@@ -111,9 +112,31 @@ export default class VoronInputValidation {
         inputsValidityBundle: [],
         isFormValid: false,     // servcie params
         passwordReapeat: false, // servcie params
-       
+        
     }
     #observableArray;
+
+    #styles = {
+        position: {
+            top : `
+                transform: translateY(-100%);
+                top: 0;
+            `,
+            rigth: `
+                transform: translateX(100%);
+                top: 0;
+                right: 0;
+            `,
+            bottom: `
+                transform: translateY(100%);
+                top: 0;
+             `,
+            left: `
+                transform: translate(-100%);
+                top: 0;
+            `
+        }
+    }
     // privat fields END
 
     //service Foo START
@@ -156,7 +179,8 @@ export default class VoronInputValidation {
                 
                 const message = document.createElement('div');     
                 message.classList.add('is_message');
-
+                message.style.cssText = this.#styles.position[this.position];
+                console.log(this.#styles.position[this.position]);
                 this.form.append(inputWrapper);
                 inputWrapper.append(message);
             } else {

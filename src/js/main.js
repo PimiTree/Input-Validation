@@ -11,6 +11,8 @@ window.addEventListener('DOMContentLoaded', () =>{
                     length: 1,
                 }
             }
-        }
+        },
+        position: 'left',
+
     });  
 });

@@ -109,6 +109,7 @@ export default class VoronInputValidation {
         // class parameters for use in class Body END
 
         this.#init();  // start the logic
+    
     };
     
     // privat fields START 
@@ -225,7 +226,9 @@ export default class VoronInputValidation {
             const repeatPasswordValidity = this.#state.passwordReapeat ? regex.test(input.value) : false;
 
             this.#setInputState (repeatPassword, repeatInputIndex, repeatPasswordValidity);
-        } else if (input == repeatPassword) {
+        }
+        
+        if (input == repeatPassword) {
             this.#state.passwordReapeat = mainPassword.value === repeatPassword.value ? true : false;
 
             return this.#state.passwordReapeat ? true : false;
@@ -286,6 +289,21 @@ export default class VoronInputValidation {
         // set additional conition for message picking
         const isPaswordFitMinimalConditions = !/[a-z]{1}/.test(value) || !/[A-Z]{1}/.test(value) || !/[0-9]{1}/.test(value) || !/[$^.*+?\/{}\[\]()|@:,;\-_=<>%#~&!]{1}/.test(value);
 
+        // standart template for messaging
+        const erorrMesConditionTemplate = () => {
+            if (value.length < tooShort.length) {
+                messageContainer.textContent = this.#prepareErrorMessage(tooShort);
+            } else if (value.length >= tooLong.length) {
+                messageContainer.textContent =  this.#prepareErrorMessage(tooLong);
+            } else if (inputType === 'password') {
+                if (isPaswordFitMinimalConditions) {
+                    messageContainer.textContent = this.errors.minConditions;
+                } else if (!this.#state.passwordReapeat) {
+                    messageContainer.textContent = this.errors.passNotEquals;
+                }
+            } 
+        }
+
         // choose message according to input type
         switch (inputType) {
             case 'text': 
@@ -302,20 +320,7 @@ export default class VoronInputValidation {
                 break;
         }
 
-        // standart template for messaging
-        const erorrMesConditionTemplate = () => {
-            if (value.length < tooShort.length) {
-                messageContainer.textContent = this.#prepareErrorMessage(tooShort);
-            } else if (value.length >= tooLong.length) {
-                messageContainer.textContent =  this.#prepareErrorMessage(tooLong);
-            } else if (inputType === 'password') {
-                if (isPaswordFitMinimalConditions) {
-                    messageContainer.textContent = this.errors.minConditions;
-                } else if (!this.#state.passwordReapeat) {
-                    messageContainer.textContent = this.errors.passNotEquals;
-                }
-            } 
-        }
+        
     }
     // assemble min max message
     #prepareErrorMessage(location) {
@@ -405,25 +410,24 @@ export default class VoronInputValidation {
     // main Event START
     #observeInputs() { 
         this.#state.inputs.forEach((input, i)=> {
-            
             let timer;
 
-            input.addEventListener('input', () => {
-                const isInputRequired = input.getAttribute('required') !== null;
+            const isInputRequired = input.getAttribute('required') !== null;
 
-                if (isInputRequired) { 
-                    const inputValidity =  this.#isInputValid(input); // check input validity before timeout
+            if (isInputRequired) { 
+                input.addEventListener('input', () => {                    
+                        const inputValidity =  this.#isInputValid(input); // check input validity before timeout
 
-                    if (input.getAttribute('type') === 'url') {
-                        this.#setInputAutocomplete(input); // if this input is url type need https:// autofill
-                    }
-                    
-                    clearTimeout(timer);        // debouncing
-                    timer = setTimeout(() => { // debouncing
-                        this.#setInputState (input, i, inputValidity); 
-                    }, this.debounceDelay);
-                }
-            });
+                        if (input.getAttribute('type') === 'url') {
+                            this.#setInputAutocomplete(input); // if this input is url type need https:// autofill
+                        }
+                        
+                        clearTimeout(timer);        // debouncing
+                        timer = setTimeout(() => { // debouncing
+                            this.#setInputState (input, i, inputValidity); 
+                        }, this.debounceDelay);
+                });
+            } else this.#state.inputsValidityBundle[i] = true;   
         })
     }
     // main Event END

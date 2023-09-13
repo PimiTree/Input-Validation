@@ -2,8 +2,8 @@ import '../sass/style.scss';
 
 import VoronInputValidation from  './modules/VoronInputValidation.js';
 
-
 window.addEventListener('DOMContentLoaded', () =>{
+
     let passwordValidation = new VoronInputValidation({
         errors: {
             tooShort: {
@@ -15,7 +15,5 @@ window.addEventListener('DOMContentLoaded', () =>{
         containering: true,
         messaging: true,
         position: 'left',
-       
-
     });  
 });

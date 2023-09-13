@@ -8,13 +8,17 @@ export default class VoronInputValidation {
         const defaultProps = {
             form: '[data-voron]',
             debounceDelay: 100,
-            source: 'type', // paramater not works
+            source: 'type',  // this not worck for now
             position: 'right',
             containering: true,
             messaging: true,
             inputApearence: true,
             buttonApearence: true,
             urlHTTPSAutocomplete: true,
+            apearenceColor: {   // this not worck for now
+                valid: '#1cce1cbf',
+                invalid: '#fb1d1d',
+            },
             limitedFileds: ['text', 'tel', 'name','password'],
             regex: {  
                 text: '^[a-zA-Zа-яёїА-ЯЇЁ\\s\\d\\-_:.,\\s]$',
@@ -106,11 +110,11 @@ export default class VoronInputValidation {
         this.regex = props.regex;
         this.limitedFileds = props.limitedFileds;
         this.#regexLimiter();
-        this.inputApearence = props.inputApearence;        // this not worck for now
-        this.buttonApearence = props.buttonApearence;         // this not worck for now
-        this.urlHTTPSAutocomplete = props.urlHTTPSAutocomplete;   // this not worck for now
+        this.inputApearence = props.inputApearence;      
+        this.buttonApearence = props.buttonApearence;         
+        this.urlHTTPSAutocomplete = props.urlHTTPSAutocomplete;  
+        
         // class parameters for use in class Body END
-        console.log(this.buttonApearence);
         this.#init();  // start the logic
     };
     
@@ -147,9 +151,6 @@ export default class VoronInputValidation {
     // privat fields END
 
     //service Foo START
-    destroyClass () {
-        this.#enableFormSubmit() 
-    }
     #mergeProps(props, options) {  // merge default and user params  
         for (const [key,value] of Object.entries(options)) {    
             if (typeof value === 'object' && props[key]) {

@@ -102,7 +102,7 @@ export default class VoronInputValidation {
         this.errors = props.errors;
         this.regex = props.regex;
         this.limitedFileds = props.limitedFileds;
-        this.#regexLimiter(this.regex);
+        this.#regexLimiter();
         this.inputApearence = true;        // this not worck for now
         this.buttonApearence = true;         // this not worck for now
         this.urlHTTPSAutocomplete = false;   // this not worck for now
@@ -172,7 +172,11 @@ export default class VoronInputValidation {
         const fields = this.limitedFileds;
 
         fields.forEach(field => {
-            this.regex[field] = `${regex[field].slice(0, regex[field].length - 1)}{${this.errors.tooShort[field].length},${this.errors.tooLong[field].length}}${regex.text.slice(-1)}`;
+            const regexHolder = this.regex[field]; // use as link to the regex container
+            const minLength = this.errors.tooShort[field].length;
+            const maxLength = this.errors.tooLong[field].length;
+
+            this.regex[field] = `${regexHolder.slice(0, regexHolder.length - 1)}{${minLength},${maxLength}}${regexHolder.slice(-1)}`;
         })
     }
     #setMessageContainer() { // create containers for inputs, reassebmle inner HTML

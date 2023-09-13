@@ -16,7 +16,7 @@ export default class VoronInputValidation {
             regex: {  
                 text: '^[a-zA-Zа-яёїА-ЯЇЁ\\s\\d\\-_:.,\\s]$',
                 name: '^[a-zA-Zа-яёїА-ЯЇЁ\\s\\d\\-_\\s]$',
-                email: '^[a-zA-Z_\\-0-9.]{2,}@[a-zA-Z]{2,}\\.[a-zA-Z]{2,}$',
+                email: '^([a-zA-Z_\\-0-9]{2,}\\.)*[a-zA-Z_\\-0-9]{2,}@[a-zA-Z]{2,}\\.[a-zA-Z]{2,}$',
                 tel: '^\\+*\\d$',
                 password: '^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[$^.*+?/{}\\[\\]()|@:,;\\-_=<>%#~&!])[a-zA-Z\\d$^.*+?/{}\\[\\]()|@:,;-_=<>%#~&!]$',                          
                 url: '^(http:\\/\\/|https:\\/\\/)?([a-zA-Z_\\-0-9]{2,}\\.){1,}[a-zA-Z]{2,}[\\/?[a-zA-Z\\d?=%\\+_\\-&]*\\/?]*$',
@@ -180,25 +180,27 @@ export default class VoronInputValidation {
         })
     }
     #setMessageContainer() { // create containers for inputs, reassebmle inner HTML
-        if (this.containering) {
-            this.formInnerElements.forEach(elem=> {
-                if (elem.tagName === 'INPUT') {
-                    const inputWrapper = document.createElement('div');
-                    inputWrapper.classList.add('is_container');
-                    inputWrapper.append(elem);
-                    this.form.append(inputWrapper);
-    
-                    if (this.messaging) {  // create message container 
-                        const message = document.createElement('div');     
-                        message.classList.add('is_message');
-                        message.style.cssText = this.#styles.position[this.position];
-                        inputWrapper.append(message);
-                    }
-                } else {
-                    this.form.append(elem);
-                }              
-            })
+        if (!this.containering) {
+           return;
         }
+
+        this.formInnerElements.forEach(elem=> {
+            if (elem.tagName === 'INPUT') {
+                const inputWrapper = document.createElement('div');
+                inputWrapper.classList.add('is_container');
+                inputWrapper.append(elem);
+                this.form.append(inputWrapper);
+
+                if (this.messaging) {  // create message container 
+                    const message = document.createElement('div');     
+                    message.classList.add('is_message');
+                    message.style.cssText = this.#styles.position[this.position];
+                    inputWrapper.append(message);
+                }
+            } else {
+                this.form.append(elem);
+            }              
+        })
         
     }
     #setInputAutocomplete(input) { // trun on https autocomplete for input[typr='url']
@@ -265,22 +267,27 @@ export default class VoronInputValidation {
 
     // messaging START
     #setMessage(input, inputValidity) {  // inject valid or invalid message
-        if (this.messaging) {
-            if (inputValidity) { // if true append okmessage 
-                if (!input.nextSibling.querySelector('.is_valid_img')) {
-                    const okImg = this.#createImgForValidMessage();
-                    // if okImg img already exist not try append
-                    input.nextSibling.textContent = "";  // clear if has text message
-                    input.nextSibling.append(okImg);     
-                }    
-            } else {
-                try { // if we got in_valid try to remove okImg
-                    input.nextSibling.querySelector('.is_valid_img').remove();
-                } catch (e) {};
-                // if input value empty not insert any messege
-                input.value.length === 0 ? input.nextSibling.textContent = "" : this.#chooseErrorMessage(input); 
+        if (!this.containering) {
+            return;
+        }
+
+        if (!this.messaging) {
+            return;
+        }
+
+        if (inputValidity) { // if true append okmessage 
+            if (!input.nextSibling.querySelector('.is_valid_img')) {
+                const okImg = this.#createImgForValidMessage();
+                // if okImg img already exist not try append
+                input.nextSibling.textContent = "";  // clear if has text message
+                input.nextSibling.append(okImg);     
             }    
-        } 
+        } else {
+            input.nextSibling.textContent = "";
+            // if input value empty not insert any messege
+            input.value.length === 0 ? input.nextSibling.textContent = "" : this.#chooseErrorMessage(input); 
+        }    
+         
     }
     #chooseErrorMessage(input) {
         // set initial variables
@@ -296,16 +303,28 @@ export default class VoronInputValidation {
         // standart template for messaging
         const erorrMesConditionTemplate = () => {
             if (value.length < tooShort.length) {
-                messageContainer.textContent = this.#prepareErrorMessage(tooShort);
-            } else if (value.length >= tooLong.length) {
-                messageContainer.textContent =  this.#prepareErrorMessage(tooLong);
-            } else if (inputType === 'password') {
+                messageContainer.textContent = this.#prepareMinMaxMessage(tooShort);
+                return;
+            }  
+            
+            if (value.length >= tooLong.length) {
+                messageContainer.textContent =  this.#prepareMinMaxMessage(tooLong);
+                return;
+            }
+            
+            if (inputType === 'password') {
                 if (isPaswordFitMinimalConditions) {
                     messageContainer.textContent = this.errors.minConditions;
-                } else if (!this.#state.passwordReapeat) {
+                    return;
+                }
+                
+                if (!this.#state.passwordReapeat) {
                     messageContainer.textContent = this.errors.passNotEquals;
+                    return;
                 }
             } 
+
+            messageContainer.textContent = this.errors.wrongSymbol;
         }
 
         // choose message according to input type
@@ -327,7 +346,7 @@ export default class VoronInputValidation {
         
     }
     // assemble min max message
-    #prepareErrorMessage(location) {
+    #prepareMinMaxMessage(location) {
         const mesBegining = location.mes.begining;
         const mesEnding = location.mes.ending;
         const mesLength = location.length;

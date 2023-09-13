@@ -7,13 +7,13 @@ export default defineConfig(() => {
       root: './src',
       build: {
         outDir: '../dist',
-        assetsDir: '',
+        assetsDir: './src/img',
         assetsInlineLimit: 0,
-        assetsInclude: ['img/*.svg'],
+        assetsInclude: ['./src/img/*.svg'],
         rollupOptions: {
           output: {
-            entryFileNames: 'js/[name]-[hash].js',
-            chunkFileNames: 'js/[name]-[hash].js',
+            entryFileNames: 'js/[name].js',
+            chunkFileNames: 'js/[name].js',
             assetFileNames: assetInfo => {
               const info = assetInfo.name.split('.');
               const extType = info[info.length - 1];
@@ -21,12 +21,12 @@ export default defineConfig(() => {
                 return `img/[name]-[hash].${extType}`;
               }
               if (/\.(css)$/.test(assetInfo.name)) {
-                return `css/[name]-[hash].${extType}`;
+                return `css/[name].${extType}`;
               }
               if (/\.(woff|woff2|eot|ttf|otf)$/.test(assetInfo.name)) {
-                return `fonts/[name]-[hash].${extType}`;
+                return `fonts/[name].${extType}`;
               }
-              return `[name]-[hash].${extType}`;
+              return `[name].${extType}`;
             },
           },
         },

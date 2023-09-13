@@ -1,4 +1,4 @@
-import okImgUrl from '../../img/ok.svg';
+import okImgUrl from '../../img/ok.svg';  // 
 
 
 export default class VoronInputValidation {
@@ -12,6 +12,9 @@ export default class VoronInputValidation {
             position: 'right',
             containering: true,
             messaging: true,
+            inputApearence: true,
+            buttonApearence: true,
+            urlHTTPSAutocomplete: true,
             limitedFileds: ['text', 'tel', 'name','password'],
             regex: {  
                 text: '^[a-zA-Zа-яёїА-ЯЇЁ\\s\\d\\-_:.,\\s]$',
@@ -103,13 +106,12 @@ export default class VoronInputValidation {
         this.regex = props.regex;
         this.limitedFileds = props.limitedFileds;
         this.#regexLimiter();
-        this.inputApearence = true;        // this not worck for now
-        this.buttonApearence = true;         // this not worck for now
-        this.urlHTTPSAutocomplete = false;   // this not worck for now
+        this.inputApearence = props.inputApearence;        // this not worck for now
+        this.buttonApearence = props.buttonApearence;         // this not worck for now
+        this.urlHTTPSAutocomplete = props.urlHTTPSAutocomplete;   // this not worck for now
         // class parameters for use in class Body END
-
+        console.log(this.buttonApearence);
         this.#init();  // start the logic
-    
     };
     
     // privat fields START 
@@ -145,6 +147,9 @@ export default class VoronInputValidation {
     // privat fields END
 
     //service Foo START
+    destroyClass () {
+        this.#enableFormSubmit() 
+    }
     #mergeProps(props, options) {  // merge default and user params  
         for (const [key,value] of Object.entries(options)) {    
             if (typeof value === 'object' && props[key]) {
@@ -204,13 +209,19 @@ export default class VoronInputValidation {
         
     }
     #setInputAutocomplete(input) { // trun on https autocomplete for input[typr='url']
+        if (!this.urlHTTPSAutocomplete) {
+            return;
+        }
+
         /(http:\/\/|https:\/\/)/.test(input.value) ? true : input.value = 'https://' + input.value;
     }
     #isFormNeedReapeatPassword() { // if form has two inputs passwrod will eneble paswords compare
         let passwrodInputCount = 0;
         this.#state.inputs.forEach((input, i)=> {
             const isPassword = input.getAttribute('type') === 'password';
+
             passwrodInputCount += isPassword ? 1 : 0;
+
             if (passwrodInputCount === 2 && isPassword) {
                 this.#state.inputs[i-1].setAttribute("data-voron", 'password-main');
                 this.#state.inputs[i].setAttribute("data-voron", 'password-repeat');
@@ -239,6 +250,7 @@ export default class VoronInputValidation {
 
             return this.#state.passwordReapeat ? true : false;
         }
+
         return inputValidity;
     }
     #setInputState (input, i, inputValidity) {  // set state, aplly apearense and inject message
@@ -255,7 +267,9 @@ export default class VoronInputValidation {
     
     #isFormValid = () => {  // checing form validity
         let arr = [];
-        for (let i = 0; i < this.#observableArray.arr.length; i++) {
+
+        // observable array is Proxy object which is not itterable
+        for (let i = 0; i < this.#observableArray.arr.length; i++) {  
             arr[i] = this.#observableArray.arr[i];
         }
 
@@ -300,8 +314,8 @@ export default class VoronInputValidation {
         // set additional conition for message picking
         const isPaswordFitMinimalConditions = !/[a-z]{1}/.test(value) || !/[A-Z]{1}/.test(value) || !/[0-9]{1}/.test(value) || !/[$^.*+?\/{}\[\]()|@:,;\-_=<>%#~&!]{1}/.test(value);
 
-        // standart template for messaging
-        const erorrMesConditionTemplate = () => {
+        // use functoin experssion with arrow because this lose context if use funciton declaratiuon
+        const erorrMesConditionTemplate = () => { 
             if (value.length < tooShort.length) {
                 messageContainer.textContent = this.#prepareMinMaxMessage(tooShort);
                 return;
@@ -362,11 +376,19 @@ export default class VoronInputValidation {
         })
     }
     #setValidApearence(input)  {
+        if (!this.inputApearence) {
+            return;
+        }
+
         input.classList.remove('is_focused');
         input.classList.remove('is_invalid');   
         input.classList.add('is_valid');
     }
     #setInvalidApearence(input) {
+        if (!this.inputApearence) {
+            return;
+        }
+
         input.classList.remove('is_focused');
         input.classList.remove('is_valid');
         input.classList.add('is_invalid');
@@ -376,15 +398,21 @@ export default class VoronInputValidation {
         }
     }
     #setButtonApearence() {
+        if (!this.buttonApearence) {
+            return;
+        }
+
+
         const formButton = this.form.querySelector('button');
 
         if (this.#state.isFormValid) {
             formButton.classList.remove('is_blocked');
             formButton.classList.add('is_unblocked');
-        } else {
-            formButton.classList.remove('is_unblocked');
-            formButton.classList.add('is_blocked');
-        }
+            return;
+        } 
+
+        formButton.classList.remove('is_unblocked');
+        formButton.classList.add('is_blocked');
     }
     #createImgForValidMessage() {
         const img = document.createElement('img');

@@ -15,5 +15,9 @@ window.addEventListener('DOMContentLoaded', () =>{
         containering: true,
         messaging: true,
         position: 'left',
+        inputApearence: true,
+        buttonApearence: true,
+        urlHTTPSAutocomplete: true,
     });  
+
 });

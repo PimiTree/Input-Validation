@@ -106,6 +106,7 @@ export default class VoronInputValidation {
         // class parameters for use in class Body Start
         this.form = document.querySelector(props.form);
         this.formInnerElements = [...this.form.querySelectorAll('*')];
+        // this.formInnerElements = [...this.form.querySelectorAll('input'), ...this.form.querySelectorAll('label'), ...this.form.querySelectorAll('button')];
         this.debounceDelay = props.debounceDelay;
         this.containering = props.containering;
         this.containerSource = props.containerSource;
@@ -190,14 +191,17 @@ export default class VoronInputValidation {
             this.regex[field] = `${regexHolder.slice(0, regexHolder.length - 1)}{${minLength},${maxLength}}${regexHolder.slice(-1)}`;
         })
     }
-    #setMessageContainer() { // create containers for inputs, reassebmle inner HTML
+    #setInputContainer() { // create containers for inputs, reassebmle inner HTML
         if (!this.containering) {
            return;
         }
 
-        this.formInnerElements.forEach(elem=> {
+        this.formInnerElements.forEach(elem => {
             // debugger;
             let inputWrapper;
+            if (elem.tagName === 'DIV' || elem.tagName === 'LABEL') {
+                return;
+            } 
 
             if (elem.tagName !== 'INPUT') {
                 this.form.append(elem);
@@ -209,20 +213,24 @@ export default class VoronInputValidation {
                 inputWrapper.classList.add('is_container');
                 inputWrapper.append(elem);
                 this.form.append(inputWrapper);
-            } else {
-                inputWrapper = document.querySelector(this.containerSource.source)
-            } 
+            }                          
+        })
+    }
+    #setMessageContainer() {
+        if (this.messaging) { 
+            const inputWrapper = this.form.querySelectorAll(this.containerSource.source);
+            
+            console.log();
 
-            if (this.messaging) {  // create message container 
+            inputWrapper.forEach(wrap => {
                 const message = document.createElement('div');     
                 message.classList.add('is_message');
                 message.style.cssText = this.#styles.position[this.position];
-                inputWrapper.append(message);
-            }          
-        })
-        
+                wrap.append(message);
+            })
+                
+        } 
     }
-
  
     #setInputAutocomplete(input) { // trun on https autocomplete for input[typr='url']
         if (!this.urlHTTPSAutocomplete) {
@@ -419,7 +427,6 @@ export default class VoronInputValidation {
             return;
         }
 
-
         const formButton = this.form.querySelector('button');
 
         if (this.#state.isFormValid) {
@@ -506,6 +513,7 @@ export default class VoronInputValidation {
         this.#setInitalState();
         this.#observableArray = this.#createObservableArray(this.#state.inputsValidityBundle);
         this.#observableArray.addObserver(this.#isFormValid);
+        this.#setInputContainer();
         this.#setMessageContainer();
         this.#isFormNeedReapeatPassword();
         this.#setFocusStyle();

@@ -25,4 +25,7 @@ window.addEventListener('DOMContentLoaded', () =>{
         
     });  
 
+    // const a = document.querySelectorAll('[data-voron] *');
+    // console.log(a)
+
 });

@@ -102,25 +102,15 @@ export default class VoronInputValidation {
 
         const props = this.#mergeProps(defaultProps, options); // merge default and user params
 
+        for (const prop in props) {
+            if (Object.prototype.hasOwnProperty.call(props, prop)) {
+              this[prop] = props[prop];
+            }
+        }
         // class parameters for use in class Body Start
         this.form = document.querySelector(props.form);
         this.formInnerElements = [...this.form.querySelectorAll('*')];
-        this.okImgUrl = props.okImgUrl;
-        this.debounceDelay = props.debounceDelay;
-        this.containering = props.containering;
-        this.containerSource = props.containerSource;
-        this.messaging = props.messaging;
-        this.positionValid = props.positionValid;
-        this.positionInvalid = props.positionInvalid;
-        this.errors = props.errors;
-        this.regex = props.regex;
-        this.limitedFileds = props.limitedFileds;
-        this.#regexLimiter();
-        this.inputApearence = props.inputApearence;      
-        this.buttonApearence = props.buttonApearence;         
-        this.urlHTTPSAutocomplete = props.urlHTTPSAutocomplete;  
-        
-        // class parameters for use in class Body END
+                
         this.#init();  // start the logic
     };
     
@@ -535,6 +525,7 @@ export default class VoronInputValidation {
     // main Event END
  
     #init() {  
+        this.#regexLimiter();
         this.#disableFormSubmit();
         this.#setButtonApearence();
         this.#setInitalState();

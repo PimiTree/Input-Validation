@@ -9,7 +9,8 @@ export default class VoronInputValidation {
             form: '[data-voron]',
             debounceDelay: 100,
             source: 'type',  // this not worck for now
-            position: 'right',
+            positionValid: 'right',
+            psitionInvalid: 'bottom',
             containering: true,
             containerSource: {
                 user: false,
@@ -106,12 +107,12 @@ export default class VoronInputValidation {
         // class parameters for use in class Body Start
         this.form = document.querySelector(props.form);
         this.formInnerElements = [...this.form.querySelectorAll('*')];
-        // this.formInnerElements = [...this.form.querySelectorAll('input'), ...this.form.querySelectorAll('label'), ...this.form.querySelectorAll('button')];
         this.debounceDelay = props.debounceDelay;
         this.containering = props.containering;
         this.containerSource = props.containerSource;
         this.messaging = props.messaging;
-        this.position = props.position;
+        this.positionValid = props.positionValid;
+        this.positionInvalid = props.positionInvalid;
         this.errors = props.errors;
         this.regex = props.regex;
         this.limitedFileds = props.limitedFileds;
@@ -134,24 +135,85 @@ export default class VoronInputValidation {
     #observableArray;  // array for proxe observer
 
     #styles = {  // service object for style control
-        position: {
+        positionValid: {
             top : `
                 transform: translateY(-100%);
                 top: 0;
+            `,
+            topCentered: `
+                transform: translate(50%, -100%);
+                top: 0;
+                right: 50%;
+                width: max-content;
             `,
             right: `
                 transform: translateX(100%);
                 top: 0;
                 right: 0;
             `,
+            rightInside: `
+                top: 0;
+                right: 0;
+                width: max-content;
+            `,
             bottom: `
                 transform: translateY(100%);
                 top: 0;
+                width: max-content;
              `,
+            bottomCentered: `
+                right: 50%;
+                transform: translateX(50%);
+                width: max-content;
+            `,
             left: `
-                transform: translate(-100%);
+                transform: translateX(-100%);
                 top: 0;
-            `
+                width: max-content;
+            `,
+            leftInside: `
+                top: 0;
+                width: max-content;
+            `,
+        },
+        positionInvalid: {
+            top: `
+                transform: translateY(-100%);
+                top: 0;
+            `,
+            topCentered: `
+                transform: translate(50%, -100%);
+                top: 0;
+                right: 50%;
+                width: max-content;
+            `,
+            right: `
+                transform: translateX(100%);
+                top: 0;
+                right: 0;
+            `,
+            rightInside: `
+                top: 0;
+                right: 0;
+                width: max-content;
+            `,
+            bottom: `
+                width: max-content;
+             `,
+            bottomCentered: `
+                right: 50%;
+                transform: translateX(50%);
+                width: max-content;
+            `,
+            left: `
+                transform: translateX(-100%);
+                top: 0;
+                width: max-content;
+            `,
+            leftInside: `
+                top: 0;
+                width: max-content;
+            `,
         }
     }
     // privat fields END
@@ -223,12 +285,17 @@ export default class VoronInputValidation {
             console.log();
 
             inputWrapper.forEach(wrap => {
-                const message = document.createElement('div');     
-                message.classList.add('is_message');
-                message.style.cssText = this.#styles.position[this.position];
-                wrap.append(message);
+                const messageValid = document.createElement('div');     
+                messageValid.classList.add('is_message_valid');
+                messageValid.style.cssText = this.#styles.positionValid[this.positionValid];
+                wrap.append(messageValid);
+
+                const messageInvalid = document.createElement('div');     
+                messageInvalid.classList.add('is_message_invalid');
+                messageInvalid.style.cssText = this.#styles.positionInvalid[this.positionInvalid];
+                wrap.append(messageInvalid);
             })
-                
+     
         } 
     }
  
@@ -305,8 +372,8 @@ export default class VoronInputValidation {
 
     // messaging START
     #setMessage(input, inputValidity) {  // inject valid or invalid message
-        const messageContainer = input.parentNode.querySelector('.is_message');
-
+        const messageContainerValid = input.parentNode.querySelector('.is_message_valid');
+        const messageContainerInvalid = input.parentNode.querySelector('.is_message_invalid');
         if (!this.containering) {
             return;
         }
@@ -316,22 +383,22 @@ export default class VoronInputValidation {
         }
 
         if (!inputValidity) {
+            messageContainerValid.textContent = "";
             // if input value empty not insert any messege
-            input.value.length === 0 ? messageContainer.textContent = "" : this.#chooseErrorMessage(input); 
+            input.value.length === 0 ? messageContainerInvalid.textContent = "" : this.#chooseErrorMessage(input, messageContainerInvalid); 
             return;
         }
-
-        if (!messageContainer.querySelector('.is_valid_img')) {
+        
+        if (!messageContainerValid.querySelector('.is_valid_img')) {
+            messageContainerInvalid.textContent = "";
             const okImg = this.#createImgForValidMessage();
             // if okImg img already exist not try append
-            messageContainer.textContent = "";  // clear if has text message
-            messageContainer.append(okImg);     
+            messageContainerValid.append(okImg);     
         }    
     }
-    #chooseErrorMessage(input) {
+    #chooseErrorMessage(input, messageContainer) {
         // set initial variables
         const inputType = input.getAttribute('type');
-        const messageContainer = input.parentNode.querySelector('.is_message');
         const value = input.value;
         const tooShort = this.errors.tooShort[inputType];
         const tooLong = this.errors.tooLong[inputType];

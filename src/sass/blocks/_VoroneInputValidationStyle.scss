@@ -13,14 +13,23 @@
 .other-container {
     position: relative;
 }
-.is_message {
+.is_message_valid {
     padding: 0px 10px;
     box-sizing: border-box;
     position: absolute;
     display: flex;
     align-items: center;
     height: 100%;
-    width: max-content;
+    width: 100%;
+}
+.is_message_invalid {
+    padding: 0px 10px;
+    box-sizing: border-box;
+    position: absolute;
+    display: flex;
+    align-items: center;
+    height: 100%;
+    width: 100%;
 }
 .is_valid_img {
     height: 20px;

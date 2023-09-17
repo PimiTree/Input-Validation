@@ -11,6 +11,9 @@
     border-radius: 30px;
 }
 .other-container {
+    display: flex;
+    justify-content: center;
+    gap: 0 10px;
     position: relative;
 }
 .is_message_valid {

@@ -1,6 +1,3 @@
-import okImgUrl from '../../img/ok.svg';  // 
-
-
 export default class VoronInputValidation {
     
     constructor(options = {}) {
@@ -9,6 +6,7 @@ export default class VoronInputValidation {
             form: '[data-voron]',
             debounceDelay: 100,
             source: 'type',  // this not worck for now
+            okImgUrl: '../../img/ok.svg',
             positionValid: 'right',
             psitionInvalid: 'bottom',
             containering: true,
@@ -107,6 +105,7 @@ export default class VoronInputValidation {
         // class parameters for use in class Body Start
         this.form = document.querySelector(props.form);
         this.formInnerElements = [...this.form.querySelectorAll('*')];
+        this.okImgUrl = props.okImgUrl;
         this.debounceDelay = props.debounceDelay;
         this.containering = props.containering;
         this.containerSource = props.containerSource;
@@ -135,7 +134,7 @@ export default class VoronInputValidation {
     #observableArray;  // array for proxe observer
 
     #styles = {  // service object for style control
-        positionValid: {
+        position: {
             top : `
                 transform: translateY(-100%);
                 top: 0;
@@ -163,7 +162,7 @@ export default class VoronInputValidation {
              `,
             bottomCentered: `
                 right: 50%;
-                transform: translateX(50%);
+                transform: translate(50%, 100%);
                 width: max-content;
             `,
             left: `
@@ -176,45 +175,6 @@ export default class VoronInputValidation {
                 width: max-content;
             `,
         },
-        positionInvalid: {
-            top: `
-                transform: translateY(-100%);
-                top: 0;
-            `,
-            topCentered: `
-                transform: translate(50%, -100%);
-                top: 0;
-                right: 50%;
-                width: max-content;
-            `,
-            right: `
-                transform: translateX(100%);
-                top: 0;
-                right: 0;
-            `,
-            rightInside: `
-                top: 0;
-                right: 0;
-                width: max-content;
-            `,
-            bottom: `
-                width: max-content;
-             `,
-            bottomCentered: `
-                right: 50%;
-                transform: translateX(50%);
-                width: max-content;
-            `,
-            left: `
-                transform: translateX(-100%);
-                top: 0;
-                width: max-content;
-            `,
-            leftInside: `
-                top: 0;
-                width: max-content;
-            `,
-        }
     }
     // privat fields END
 
@@ -281,18 +241,18 @@ export default class VoronInputValidation {
     #setMessageContainer() {
         if (this.messaging) { 
             const inputWrapper = this.form.querySelectorAll(this.containerSource.source);
-            
-            console.log();
 
             inputWrapper.forEach(wrap => {
+                console.log(window.getComputedStyle(wrap).display);
+
                 const messageValid = document.createElement('div');     
                 messageValid.classList.add('is_message_valid');
-                messageValid.style.cssText = this.#styles.positionValid[this.positionValid];
+                messageValid.style.cssText = this.#styles.position[this.positionValid];
                 wrap.append(messageValid);
 
                 const messageInvalid = document.createElement('div');     
                 messageInvalid.classList.add('is_message_invalid');
-                messageInvalid.style.cssText = this.#styles.positionInvalid[this.positionInvalid];
+                messageInvalid.style.cssText = this.#styles.position[this.positionInvalid];
                 wrap.append(messageInvalid);
             })
      
@@ -507,7 +467,7 @@ export default class VoronInputValidation {
     }
     #createImgForValidMessage() {
         const img = document.createElement('img');
-        img.setAttribute('src', okImgUrl);
+        img.setAttribute('src', this.okImgUrl);
         img.classList.add('is_valid_img');
 
         return img;

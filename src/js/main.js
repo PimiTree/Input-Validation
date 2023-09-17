@@ -8,16 +8,21 @@ window.addEventListener('DOMContentLoaded', () =>{
         errors: {
             tooShort: {
                 name: {
-                    length: 1,
+                    length: 7,
                 }
             }
         },
         containering: true,
+        containerSource: {
+            user: true,
+            source: ".other-container",
+        },
         messaging: true,
         position: 'left',
         inputApearence: true,
         buttonApearence: true,
         urlHTTPSAutocomplete: true,
+        
     });  
 
 });

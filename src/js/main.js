@@ -1,6 +1,8 @@
 import '../sass/style.scss';
 
-import {Valio} from  './modules/valio.js';
+import Valio from '@voronporto/valio';
+import '@voronporto/valio/valio.css';
+
 
 window.addEventListener('DOMContentLoaded', () =>{
 
@@ -13,13 +15,9 @@ window.addEventListener('DOMContentLoaded', () =>{
             }
         },
         containering: true,
-        containerSource: {
-            user: true,
-            source: ".other-container",
-        },
         messaging: true,
-        positionValid: 'bottomCentered',
-        positionInvalid: 'bottomCentered',
+        positionValid: 'leftInside',
+        positionInvalid: 'bottom',
         inputApearence: true,
         buttonApearence: true,
         urlHTTPSAutocomplete: true,
@@ -29,4 +27,6 @@ window.addEventListener('DOMContentLoaded', () =>{
     // const a = document.querySelectorAll('[data-voron] *');
     // console.log(a)
 
+    // const a = document.querySelector('header');
+    // console.log(a.getAttribute('class').includes('otherclass'));
 });

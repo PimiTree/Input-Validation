@@ -13,12 +13,7 @@ dist-ssr
 *.local
 *.cdr
 other files
-src
-vite.config.json
-package.json
-!__publish/package.json
-package-lock.json
-.gitignore
+
 
 # Editor directories and files
 .vscode/*

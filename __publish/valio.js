@@ -186,6 +186,13 @@ class Valio {
     #setInitalState() { // fill up two main arrays - inputs siquence and default validity of them
         this.#state.inputs = [...this.form.querySelectorAll('input')];
         this.#state.inputsValidityBundle = [].fill.call({length: this.#state.inputs.length}, false); 
+
+        this.#observableArray = this.#createObservableArray(this.#state.inputsValidityBundle);
+        this.#observableArray.addObserver(this.#isFormValid);
+
+        this.#state.inputs.forEach((input, i) => {
+            this.#observableArray.arr[i] = input.getAttribute('required') !== null ? false : true;
+        })
     }
     #regexLimiter(regex) { // by default regex is string - function add to string {min,max} parameters and create regex
         const fields = this.limitedFileds;
@@ -225,12 +232,15 @@ class Valio {
                 this.form.append(inputWrapper);
             }  
 
-            console.log(inputParent);
+            console.log(inputParent.getAttribute('class'));
+        
+            try {
+                if (!inputParent.getAttribute('class').includes(this.containerSource.source.slice(1,))) {
 
-            if (!inputParent.getAttribute('class').includes(this.containerSource.source.slice(1,))) {
-
-                inputParent.append(inputWrapper);
-            }
+                    inputParent.append(inputWrapper);
+                }
+            }  catch (e) {}
+          
             
         })
     }
@@ -535,8 +545,6 @@ class Valio {
         this.#disableFormSubmit();
         this.#setButtonApearence();
         this.#setInitalState();
-        this.#observableArray = this.#createObservableArray(this.#state.inputsValidityBundle);
-        this.#observableArray.addObserver(this.#isFormValid);
         this.#setInputContainer();
         this.#setMessageContainer();
         this.#isFormNeedReapeatPassword();

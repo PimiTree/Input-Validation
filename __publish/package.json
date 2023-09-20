@@ -1,5 +1,5 @@
 {
-  "name": "valio",
+  "name": "@voronporto/valio",
   "version": "1.0.0",
   "description": "Valio for simple form validation and premade apearence",
   "main": "valio.js",

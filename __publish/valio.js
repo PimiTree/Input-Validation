@@ -12,7 +12,7 @@ class Valio {
             containering: true,
             containerSource: {
                 user: false,
-                source: "",
+                source: ".is_container",
             },
             messaging: true,
             inputApearence: true,
@@ -206,6 +206,9 @@ class Valio {
         this.formInnerElements.forEach(elem => {
             // debugger;
             let inputWrapper;
+
+            const inputParent = elem.parentNode;
+
             if (elem.tagName === 'DIV' || elem.tagName === 'LABEL') {
                 return;
             } 
@@ -220,7 +223,15 @@ class Valio {
                 inputWrapper.classList.add('is_container');
                 inputWrapper.append(elem);
                 this.form.append(inputWrapper);
-            }                          
+            }  
+
+            console.log(inputParent);
+
+            if (!inputParent.getAttribute('class').includes(this.containerSource.source.slice(1,))) {
+
+                inputParent.append(inputWrapper);
+            }
+            
         })
     }
     #setMessageContainer() {
@@ -532,7 +543,7 @@ class Valio {
         this.#setFocusStyle();
         this.#observeInputs();
     } 
-}
+};
 
 
-module.exports = Valio;
+export default Valio;

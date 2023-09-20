@@ -1,0 +1,26 @@
+{
+  "name": "valio",
+  "version": "1.0.0",
+  "description": "Valio for simple form validation and premade apearence",
+  "main": "valio.js",
+  "scripts": {
+    "test": ""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PimiTree/Input-Validation.git"
+  },
+  "keywords": [
+    "js",
+    "css",
+    "forms",
+    "fron-end",
+    "lib"
+  ],
+  "author": "Voron-porto <voronenkotg@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/PimiTree/Input-Validation/issues"
+  },
+  "homepage": "https://github.com/PimiTree/Input-Validation#readme"
+}

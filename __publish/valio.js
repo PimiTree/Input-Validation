@@ -1,4 +1,4 @@
-export default class VoronInputValidation {
+class Valio {
     
     constructor(options = {}) {
         // Default parameters
@@ -133,7 +133,6 @@ export default class VoronInputValidation {
                 transform: translate(50%, -100%);
                 top: 0;
                 right: 50%;
-                width: max-content;
             `,
             right: `
                 transform: translateX(100%);
@@ -143,17 +142,14 @@ export default class VoronInputValidation {
             rightInside: `
                 top: 0;
                 right: 0;
-                width: max-content;
             `,
             bottom: `
                 transform: translateY(100%);
                 top: 0;
-                width: max-content;
              `,
             bottomCentered: `
                 right: 50%;
                 transform: translate(50%, 100%);
-                width: max-content;
             `,
             left: `
                 transform: translateX(-100%);
@@ -162,7 +158,6 @@ export default class VoronInputValidation {
             `,
             leftInside: `
                 top: 0;
-                width: max-content;
             `,
         },
     }
@@ -538,3 +533,6 @@ export default class VoronInputValidation {
         this.#observeInputs();
     } 
 }
+
+
+module.exports = Valio;

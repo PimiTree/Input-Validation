@@ -15,5 +15,8 @@
 		"vite": "^4.4.5",
 		"vite-plugin-image-optimizer": "^1.1.6",
 		"vite-plugin-webp-generator": "^0.0.5"
+	},
+	"dependencies": {
+		"valio": "^1.0.0"
 	}
 }

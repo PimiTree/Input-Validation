@@ -23,7 +23,7 @@
     display: flex;
     align-items: center;
     height: 100%;
-    width: 100%;
+    width: max-content;
 }
 .is_message_invalid {
     padding: 0px 10px;
@@ -32,7 +32,7 @@
     display: flex;
     align-items: center;
     height: 100%;
-    width: 100%;
+    width: max-content;
 }
 .is_valid_img {
     height: 20px;

@@ -1,10 +1,10 @@
 import '../sass/style.scss';
 
-import VoronInputValidation from  './modules/VoronInputValidation.js';
+import {Valio} from  './modules/valio.js';
 
 window.addEventListener('DOMContentLoaded', () =>{
 
-    let passwordValidation = new VoronInputValidation({
+    let val = new Valio ({
         errors: {
             tooShort: {
                 name: {

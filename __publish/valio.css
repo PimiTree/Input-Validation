@@ -2,13 +2,8 @@
 .is_container {
     position: relative;
 }
-[data-voron] button {
-    padding: 10px 25px;
-    border-radius: 30px; 
-}
 .is_container input {
     padding: 10px 25px;
-    border-radius: 30px;
 }
 .is_message_valid {
     padding: 0px 10px;

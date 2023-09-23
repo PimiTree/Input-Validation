@@ -4,6 +4,7 @@ class Valio {
         // Default parameters
         const defaultProps = {
             form: '[data-voron]',
+            callback: ['dfdf'],
             debounceDelay: 100,
             source: 'type',  // this not worck for now
             okImgUrl: '../../img/ok.svg',
@@ -96,6 +97,7 @@ class Valio {
                         },
                         length: 10,
                     },
+
                 },
             },            
         };
@@ -240,8 +242,6 @@ class Valio {
                     inputParent.append(inputWrapper);
                 }
             }  catch (e) {}
-          
-            
         })
     }
     #setMessageContainer() {
@@ -333,6 +333,11 @@ class Valio {
         this.#state.isFormValid = !arr.includes(false);
         this.#state.isFormValid ? this.#enableFormSubmit() : this.#disableFormSubmit();
         this.#setButtonApearence();
+      
+        this.callback.forEach(call => {
+            call();
+        })
+       
     };
     //service Foo END  
 

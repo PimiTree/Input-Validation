@@ -334,10 +334,11 @@ class Valio {
         this.#state.isFormValid ? this.#enableFormSubmit() : this.#disableFormSubmit();
         this.#setButtonApearence();
       
-        this.callback.forEach(call => {
-            call();
-        })
-       
+        if (this.#state.isFormValid) {
+            this.callback.forEach(call => {
+                call();
+            })
+        }       
     };
     //service Foo END  
 

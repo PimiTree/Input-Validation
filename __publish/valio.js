@@ -185,6 +185,11 @@ class Valio {
     #enableFormSubmit() {   // unblocking form submit
         this.form.removeEventListener('submit', this.#preventDefault);  
     }
+    #fillObservableArray() {
+        this.#state.inputs.forEach((input, i) => {
+            this.#observableArray.arr[i] = input.getAttribute('required') !== null ? false : true;
+        })
+    }
     #setInitalState() { // fill up two main arrays - inputs siquence and default validity of them
         this.#state.inputs = [...this.form.querySelectorAll('input')];
         this.#state.inputsValidityBundle = [].fill.call({length: this.#state.inputs.length}, false); 
@@ -192,9 +197,7 @@ class Valio {
         this.#observableArray = this.#createObservableArray(this.#state.inputsValidityBundle);
         this.#observableArray.addObserver(this.#isFormValid);
 
-        this.#state.inputs.forEach((input, i) => {
-            this.#observableArray.arr[i] = input.getAttribute('required') !== null ? false : true;
-        })
+        this.#fillObservableArray();
     }
     #regexLimiter() { // by default regex is string - function add to string {min,max} parameters and create regex
         const fields = this.limitedFileds;
@@ -234,8 +237,6 @@ class Valio {
                 this.form.append(inputWrapper);
             }  
 
-            console.log(inputParent.getAttribute('class'));
-        
             try {
                 if (!inputParent.getAttribute('class').includes(this.containerSource.source.slice(1,))) {
                     inputParent.append(inputWrapper);
@@ -248,8 +249,6 @@ class Valio {
             const inputWrapper = this.form.querySelectorAll(this.containerSource.source);
 
             inputWrapper.forEach(wrap => {
-                console.log(window.getComputedStyle(wrap).display);
-
                 const messageValid = document.createElement('div');     
                 messageValid.classList.add('is_message_valid');
                 messageValid.style.cssText = this.#styles.position[this.positionValid];
@@ -321,6 +320,7 @@ class Valio {
     #isFormValid = () => {
         let arr = [];
 
+        console.log(this.#observableArray.arr);
         // observable array is Proxy object which is not itterable
         for (let i = 0; i < this.#observableArray.arr.length; i++) {  
             arr[i] = this.#observableArray.arr[i];
@@ -523,23 +523,23 @@ class Valio {
             const isInputRequired = input.getAttribute('required') !== null;
 
             if (isInputRequired) { 
-                input.addEventListener('input', () => {                    
-                        const inputValidity =  this.#isInputValid(input); // check input validity before timeout
+                input.addEventListener('input', () => {                      
+                    const inputValidity =  this.#isInputValid(input); 
 
-                        if (input.getAttribute('type') === 'url') {
-                            this.#setInputAutocomplete(input); // if this input is url type need https:// autofill
-                        }
-                        
-                        clearTimeout(timer);        // debouncing
-                        timer = setTimeout(() => { // debouncing
-                            this.#setInputState (input, i, inputValidity); 
-                        }, this.debounceDelay);
+                    if (input.getAttribute('type') === 'url') {
+                        this.#setInputAutocomplete(input); 
+                    }
+                    
+                    clearTimeout(timer);        
+                    timer = setTimeout(() => { 
+                        this.#setInputState (input, i, inputValidity); 
+                    }, this.debounceDelay);
                 });
             } else this.#state.inputsValidityBundle[i] = true;   
         })
     }
     #resetForm(e) {   
-        [...this.querySelectorAll('*')].forEach(elem => {          
+        [...this.form.querySelectorAll('*')].forEach(elem => {          
             if (elem.classList.contains('is_valid_img')) {
                 elem.remove();
             }
@@ -550,15 +550,17 @@ class Valio {
             if (elem.classList.contains('is_unblocked')) {
                 elem.classList.remove('is_unblocked');
                 elem.classList.add('is_blocked');
-            }
-            
+            }      
         })
+        this.#fillObservableArray();
+        console.log(this.#observableArray.arr);
     } 
     #resetFormHandler() {
-        this.form.addEventListener('reset', this.#resetForm);
+        this.form.addEventListener('reset', () => {
+            this.#resetForm()
+        });
     }
     // main Event END
- 
     #init() {  
         this.#regexLimiter();
         this.#disableFormSubmit();

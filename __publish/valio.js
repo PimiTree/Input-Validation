@@ -336,8 +336,8 @@ class Valio {
       
         this.callback.forEach(call => {
             call(this.#state.isFormValid);
-           
-        }       
+        })
+              
     };
     //service Foo END  
 

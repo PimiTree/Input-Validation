@@ -20,9 +20,11 @@ window.addEventListener('DOMContentLoaded', () =>{
         positionInvalid: 'bottom',
         inputApearence: true,
         buttonApearence: true,
-        urlHTTPSAutocomplete: true,       
+        urlHTTPSAutocomplete: true,    
+  
     });  
 
+    
     // const a = document.querySelectorAll('[data-voron] *');
     // console.log(a)
 

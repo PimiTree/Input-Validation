@@ -196,7 +196,7 @@ class Valio {
             this.#observableArray.arr[i] = input.getAttribute('required') !== null ? false : true;
         })
     }
-    #regexLimiter(regex) { // by default regex is string - function add to string {min,max} parameters and create regex
+    #regexLimiter() { // by default regex is string - function add to string {min,max} parameters and create regex
         const fields = this.limitedFileds;
 
         fields.forEach(field => {
@@ -238,7 +238,6 @@ class Valio {
         
             try {
                 if (!inputParent.getAttribute('class').includes(this.containerSource.source.slice(1,))) {
-
                     inputParent.append(inputWrapper);
                 }
             }  catch (e) {}
@@ -261,10 +260,8 @@ class Valio {
                 messageInvalid.style.cssText = this.#styles.position[this.positionInvalid];
                 wrap.append(messageInvalid);
             })
-     
         } 
     }
- 
     #setInputAutocomplete(input) { // trun on https autocomplete for input[typr='url']
         if (!this.urlHTTPSAutocomplete) {
             return;
@@ -304,7 +301,6 @@ class Valio {
         
         if (input == repeatPassword) {
             this.#state.passwordReapeat = mainPassword.value === repeatPassword.value ? true : false;
-
             return this.#state.passwordReapeat ? true : false;
         }
 
@@ -335,7 +331,9 @@ class Valio {
         this.#setButtonApearence();
       
         this.callback.forEach(call => {
-            call(this.#state.isFormValid);
+            try {
+                call(this.#state.isFormValid);
+            } catch (e) {}
         })
               
     };
@@ -383,18 +381,15 @@ class Valio {
                 messageContainer.textContent = this.#prepareMinMaxMessage(tooShort);
                 return;
             }  
-            
             if (value.length >= tooLong.length) {
                 messageContainer.textContent =  this.#prepareMinMaxMessage(tooLong);
                 return;
             }
-            
             if (inputType === 'password') {
                 if (isPaswordFitMinimalConditions) {
                     messageContainer.textContent = this.errors.minConditions;
                     return;
                 }
-                
                 if (!this.#state.passwordReapeat) {
                     messageContainer.textContent = this.errors.passNotEquals;
                     return;
@@ -543,6 +538,25 @@ class Valio {
             } else this.#state.inputsValidityBundle[i] = true;   
         })
     }
+    #resetForm(e) {   
+        [...this.querySelectorAll('*')].forEach(elem => {          
+            if (elem.classList.contains('is_valid_img')) {
+                elem.remove();
+            }
+            if (elem.classList.contains('is_valid')) {
+                elem.classList.remove('is_valid');
+                elem.classList.add('is_focused');
+            }
+            if (elem.classList.contains('is_unblocked')) {
+                elem.classList.remove('is_unblocked');
+                elem.classList.add('is_blocked');
+            }
+            
+        })
+    } 
+    #resetFormHandler() {
+        this.form.addEventListener('reset', this.#resetForm);
+    }
     // main Event END
  
     #init() {  
@@ -555,6 +569,7 @@ class Valio {
         this.#isFormNeedReapeatPassword();
         this.#setFocusStyle();
         this.#observeInputs();
+        this.#resetFormHandler();
     } 
 };
 

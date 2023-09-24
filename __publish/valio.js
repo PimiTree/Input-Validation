@@ -336,7 +336,7 @@ class Valio {
       
         if (this.#state.isFormValid) {
             this.callback.forEach(call => {
-                call();
+                call(this.#state.isFormValid);
             })
         }       
     };

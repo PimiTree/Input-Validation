@@ -9,7 +9,7 @@
 - **Apearence** - valio includes premade styles for input to markup valid and invalid state
 - **Messeging** - customizing error message text, positioning around input feild (**more in coming soon*)
 
-# AL Bototm instructions are not vlaid and not WORKS! 
+# All instructions are not valid and not WORKS! 
 ## Instalation
 **NPM**
 1. `npm i @voronporto/valio`
